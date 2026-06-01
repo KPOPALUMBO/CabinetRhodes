@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cabinet de Rhodes</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --paper: #f5edd8; --paper-dark: #e8d9b5; --ink: #2c1a0e; --ink-light: #5a3e2b;
+    --ink-faint: #8b6b4a; --sepia: #9b7a4d; --accent: #7a1a1a; --accent-light: #b03a2e;
+    --green-old: #3a5a3a; --border: #c4a97a; --border-dark: #8b6b4a;
+  }
+  body { background: var(--paper); color: var(--ink); font-family: 'Crimson Text', serif; min-height: 100vh; }
+  .app { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width: 220px; min-width: 220px; background: var(--ink); display: flex; flex-direction: column; border-right: 3px solid var(--accent); }
+  .sidebar-header { background: var(--accent); padding: 20px 16px 16px; text-align: center; border-bottom: 2px solid #5a1010; }
+  .sidebar-header .cross { font-size: 28px; color: var(--paper); font-family: 'Playfair Display', serif; margin-bottom: 4px; }
+  .sidebar-header h1 { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700; color: var(--paper); letter-spacing: 2px; text-transform: uppercase; line-height: 1.3; }
+  .sidebar-header p { font-family: 'IM Fell English', serif; font-size: 11px; color: #d4a070; font-style: italic; margin-top: 4px; }
+  .nav-section { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .nav-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--sepia); padding: 8px 16px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; cursor: pointer; color: #c4a97a; font-size: 14px; font-family: 'Crimson Text', serif; transition: all 0.15s; border-left: 3px solid transparent; }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: var(--paper); }
+  .nav-item.active { background: rgba(122,26,26,0.3); color: var(--paper); border-left-color: var(--accent-light); }
+  .nav-item i { font-size: 16px; width: 18px; }
+  .sidebar-footer { margin-top: auto; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 11px; color: var(--sepia); text-align: center; font-style: italic; }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar { background: var(--paper-dark); border-bottom: 2px solid var(--border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .topbar-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+  .topbar-date { font-family: 'IM Fell English', serif; font-size: 13px; color: var(--ink-faint); font-style: italic; }
+
+  /* SYNC BADGE */
+  .sync-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-family: 'Crimson Text', serif; color: var(--ink-faint); font-style: italic; padding: 4px 10px; border: 1px solid var(--border); border-radius: 20px; background: var(--paper); }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #aaa; flex-shrink: 0; transition: background 0.4s; }
+  .sync-dot.connected { background: var(--green-old); }
+  .sync-dot.saving { background: #c97d10; animation: blink 0.6s infinite alternate; }
+  .sync-dot.error { background: var(--accent); }
+  @keyframes blink { from { opacity: 1; } to { opacity: 0.2; } }
+
+  .content { flex: 1; padding: 24px; overflow-y: auto; background: var(--paper); }
+  .page { display: none; }
+  .page.active { display: block; }
+  .ornament { text-align: center; color: var(--border-dark); font-size: 18px; margin: 8px 0 20px; letter-spacing: 8px; }
+
+  /* METRICS */
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .metric-card { background: var(--paper-dark); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; position: relative; overflow: hidden; }
+  .metric-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+  .metric-card .label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .metric-card .value { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .metric-card .sub { font-size: 12px; color: var(--ink-faint); margin-top: 4px; font-style: italic; }
+
+  /* TABLES */
+  .table-wrap { background: var(--paper-dark); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+  .table-header { background: var(--ink); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .table-header h3 { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--paper); letter-spacing: 1px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: rgba(44,26,14,0.06); }
+  th { text-align: left; padding: 10px 14px; font-family: 'Crimson Text', serif; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-faint); border-bottom: 1px solid var(--border); font-weight: 600; }
+  td { padding: 8px 14px; font-size: 15px; color: var(--ink-light); border-bottom: 1px solid rgba(196,169,122,0.3); font-family: 'Crimson Text', serif; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(196,169,122,0.1); }
+
+  /* BUTTONS */
+  .btn { background: var(--accent); color: var(--paper); border: none; border-radius: 3px; padding: 6px 14px; cursor: pointer; font-family: 'Crimson Text', serif; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; }
+  .btn:hover { background: var(--accent-light); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--ink-light); border-radius: 3px; padding: 5px 12px; cursor: pointer; font-family: 'Crimson Text', serif; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
+  .btn-outline:hover { background: var(--paper-dark); border-color: var(--border-dark); }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+  .btn-soin { background: var(--green-old); color: var(--paper); border: none; border-radius: 3px; padding: 10px 22px; cursor: pointer; font-family: 'Playfair Display', serif; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s; letter-spacing: 0.5px; }
+  .btn-soin:hover { background: #2a4a2a; }
+
+  /* BADGES */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 12px; font-weight: 600; }
+  .badge-green { background: #d4e8d4; color: #2a4a2a; }
+  .badge-red { background: #f0d4d4; color: #5a1a1a; }
+  .badge-amber { background: #f5e6c8; color: #5a3a10; }
+
+  /* STOCK BAR */
+  .stock-bar { height: 5px; background: var(--border); border-radius: 2px; margin-top: 3px; overflow: hidden; width: 80px; }
+  .stock-fill { height: 100%; border-radius: 2px; }
+
+  /* MODALS */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(44,26,14,0.6); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--paper); border: 2px solid var(--border-dark); border-radius: 4px; padding: 24px; width: 480px; max-width: 95vw; position: relative; }
+  .modal h3 { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--accent); margin-bottom: 4px; }
+  .modal .ornament-sm { color: var(--border-dark); letter-spacing: 6px; font-size: 14px; margin-bottom: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-faint); }
+  .form-group input, .form-group select { background: var(--paper-dark); border: 1px solid var(--border); border-radius: 3px; padding: 7px 10px; font-family: 'Crimson Text', serif; font-size: 15px; color: var(--ink); outline: none; }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+  .close-modal { position: absolute; top: 12px; right: 12px; background: none; border: none; cursor: pointer; font-size: 20px; color: var(--ink-faint); }
+  .confirm-box { background: #f0d4d4; border: 1px solid #c09090; border-radius: 3px; padding: 10px 14px; margin-bottom: 14px; font-size: 14px; color: #5a1a1a; }
+
+  /* JOURNAL */
+  .journal-entry { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(196,169,122,0.3); }
+  .journal-entry:last-child { border-bottom: none; }
+  .journal-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .journal-icon.income, .journal-icon.soin { background: #d4e8d4; color: #2a4a2a; }
+  .journal-icon.expense { background: #f0d4d4; color: #5a1a1a; }
+  .journal-icon.stock-add { background: #d4e8d4; color: #2a4a2a; }
+  .journal-icon.stock-remove { background: #f5e6c8; color: #5a3a10; }
+  .journal-info { flex: 1; }
+  .journal-info .jdesc { font-size: 15px; color: var(--ink-light); }
+  .journal-info .jdate { font-size: 12px; color: var(--ink-faint); font-style: italic; margin-top: 2px; }
+  .journal-amount { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; }
+  .journal-amount.plus { color: var(--green-old); }
+  .journal-amount.minus { color: var(--accent); }
+  .journal-amount.neutral { color: var(--ink-faint); font-size: 13px; }
+
+  /* EMPLOYEES */
+  .employee-card { background: var(--paper-dark); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+  .emp-avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--border-dark); background: var(--ink); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 16px; color: var(--paper); flex-shrink: 0; }
+  .emp-info { flex: 1; }
+  .emp-name { font-family: 'Playfair Display', serif; font-size: 16px; color: var(--ink); margin-bottom: 2px; }
+  .emp-role { font-size: 13px; color: var(--ink-faint); font-style: italic; }
+
+  /* CHART */
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; padding: 0 4px; margin: 16px 0 8px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--accent); min-height: 4px; }
+  .bar-label { font-size: 10px; color: var(--ink-faint); text-align: center; }
+
+  /* MISC */
+  .empty-state { text-align: center; color: var(--ink-faint); font-style: italic; padding: 28px; font-size: 14px; }
+  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 4px; font-family: 'Crimson Text', serif; font-size: 14px; border-left: 4px solid var(--accent); opacity: 0; transform: translateY(10px); transition: all 0.3s; z-index: 999; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { border-left-color: var(--green-old); }
+
+  /* LOCK SCREEN */
+  .lock-screen { position: fixed; inset: 0; background: var(--ink); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; transition: opacity 0.6s; }
+  .lock-screen.hidden { opacity: 0; pointer-events: none; }
+  .lock-cross { font-size: 56px; color: var(--accent); margin-bottom: 10px; }
+  .lock-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--paper); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
+  .lock-sub { font-family: 'IM Fell English', serif; font-size: 14px; color: #d4a070; font-style: italic; margin-bottom: 36px; }
+  .lock-box { background: rgba(255,255,255,0.04); border: 1px solid rgba(196,169,122,0.25); border-radius: 6px; padding: 28px 32px; width: 320px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .lock-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--sepia); align-self: flex-start; }
+  .lock-input { background: rgba(255,255,255,0.07); border: 1px solid rgba(196,169,122,0.3); border-radius: 4px; padding: 12px 16px; font-family: 'Playfair Display', serif; font-size: 28px; color: var(--paper); letter-spacing: 10px; text-align: center; width: 100%; outline: none; transition: border-color 0.2s; }
+  .lock-input:focus { border-color: var(--accent); }
+  .lock-input.shake { animation: shake 0.4s; border-color: var(--accent) !important; }
+  .lock-btn { background: var(--accent); color: var(--paper); border: none; border-radius: 4px; padding: 11px 28px; cursor: pointer; font-family: 'Playfair Display', serif; font-size: 15px; letter-spacing: 1px; width: 100%; transition: background 0.15s; }
+  .lock-btn:hover { background: var(--accent-light); }
+  .lock-error { font-size: 13px; color: #e07070; font-style: italic; min-height: 18px; }
+  .lock-ornament { color: rgba(196,169,122,0.3); letter-spacing: 8px; font-size: 16px; margin: 18px 0 0; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+
+  .loading-overlay { position: fixed; inset: 0; background: var(--paper); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; transition: opacity 0.5s; }
+  .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+  .loading-cross { font-size: 52px; color: var(--accent); animation: blink 1s infinite alternate; }
+  .loading-text { font-family: 'IM Fell English', serif; font-size: 16px; color: var(--ink-faint); font-style: italic; }
+
+
+  /* SHIFT TRACKING */
+  .emp-shift { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .emp-shift-status { font-size: 13px; color: var(--ink-faint); font-style: italic; flex: 1; }
+  .emp-shift-status.en-service { color: var(--green-old); font-style: normal; font-weight: 600; }
+  .emp-hours { font-family: 'Playfair Display', serif; font-size: 13px; color: var(--ink-faint); }
+  .emp-total-hours { background: var(--paper-dark); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .emp-total-hours .label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-faint); }
+  .emp-total-hours .value { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--accent); font-weight: 700; }
+  /* CONTRATS */
+  .contrat-card { background: var(--paper-dark); border: 1px solid var(--border); border-radius: 4px; margin-bottom: 12px; overflow: hidden; transition: box-shadow 0.15s; }
+  .contrat-card:hover { box-shadow: 0 2px 10px rgba(44,26,14,0.12); }
+  .contrat-header { display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; }
+  .contrat-icon { width: 40px; height: 40px; border-radius: 3px; background: var(--ink); display: flex; align-items: center; justify-content: center; font-size: 17px; color: var(--paper); flex-shrink: 0; }
+  .contrat-icon.actif { background: var(--green-old); }
+  .contrat-icon.termine { background: #5a3a10; }
+  .contrat-icon.suspendu { background: var(--accent); }
+  .contrat-meta { flex: 1; }
+  .contrat-nom { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ink); }
+  .contrat-sous { font-size: 12px; color: var(--ink-faint); font-style: italic; margin-top: 2px; }
+  .contrat-badge-wrap { display: flex; align-items: center; gap: 10px; }
+  .contrat-body { border-top: 1px solid var(--border); padding: 14px 16px; background: rgba(245,237,216,0.5); display: none; }
+  .contrat-body.open { display: block; }
+  .contrat-detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .contrat-detail { background: var(--paper); border: 1px solid var(--border); border-radius: 3px; padding: 8px 12px; }
+  .contrat-detail .cd-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 3px; }
+  .contrat-detail .cd-val { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ink); }
+  .contrat-clauses { background: var(--paper); border: 1px solid var(--border); border-radius: 3px; padding: 10px 14px; font-size: 14px; color: var(--ink-light); line-height: 1.7; font-style: italic; white-space: pre-wrap; }
+  .contrat-actions-bar { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .active-filtre { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; }
+
+  /* BLOC-NOTES */
+  .note-card { background: var(--paper-dark); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px; margin-bottom: 12px; position: relative; transition: box-shadow 0.15s; }
+  .note-card:hover { box-shadow: 0 2px 10px rgba(44,26,14,0.1); }
+  .note-card::before { content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; background: var(--border-dark); }
+  .note-card.priority-haute::before { background: var(--accent); }
+  .note-card.priority-normale::before { background: var(--sepia); }
+  .note-card.priority-info::before { background: var(--green-old); }
+  .note-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .note-auteur-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ink); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display',serif; font-size: 12px; color: var(--paper); flex-shrink: 0; }
+  .note-auteur-info { flex: 1; }
+  .note-auteur-name { font-family: 'Playfair Display',serif; font-size: 14px; color: var(--ink); }
+  .note-meta { font-size: 12px; color: var(--ink-faint); font-style: italic; margin-top: 1px; }
+  .note-titre { font-family: 'Playfair Display',serif; font-size: 17px; color: var(--ink); margin-bottom: 8px; }
+  .note-texte { font-size: 15px; color: var(--ink-light); line-height: 1.7; white-space: pre-wrap; }
+  .note-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(196,169,122,0.3); flex-wrap: wrap; gap: 8px; }
+  .note-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .note-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--paper); border: 1px solid var(--border); color: var(--ink-faint); font-style: italic; }
+
+  /* GUIDE MÉDICAL — GRANDES SECTIONS */
+  .guide-big-section { border: 2px solid var(--border); border-radius: 8px; margin-bottom: 18px; overflow: hidden; box-shadow: 0 2px 8px rgba(44,26,14,0.07); transition: box-shadow 0.2s; }
+  .guide-big-section:hover { box-shadow: 0 4px 18px rgba(44,26,14,0.13); }
+  .guide-big-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; cursor: pointer; background: var(--paper-dark); transition: background 0.15s; user-select: none; }
+  .guide-big-header:hover { background: #e0cfa8; }
+  .guide-big-left { display: flex; align-items: center; gap: 16px; }
+  .guide-big-emoji { font-size: 38px; line-height: 1; }
+  .guide-big-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--accent); font-weight: 700; margin-bottom: 3px; }
+  .guide-big-sub { font-family: 'IM Fell English', serif; font-size: 13px; color: var(--ink-faint); font-style: italic; }
+  .guide-big-arrow { font-size: 16px; color: var(--sepia); transition: transform 0.25s; }
+  .guide-big-arrow.open { transform: rotate(180deg); }
+  .guide-big-body { border-top: 2px solid var(--border); padding: 20px; background: var(--paper); }
+  .guide-sub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+  .guide-sub-card { background: var(--paper-dark); border: 1px solid var(--border); border-radius: 6px; padding: 18px 16px 14px; cursor: pointer; text-align: center; transition: all 0.18s; position: relative; overflow: hidden; }
+  .guide-sub-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+  .guide-sub-card:hover { border-color: var(--accent); box-shadow: 0 3px 14px rgba(122,26,26,0.16); transform: translateY(-2px); }
+  .guide-sub-icon { font-size: 32px; display: block; margin-bottom: 10px; line-height: 1; }
+  .guide-sub-title { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ink); font-weight: 600; margin-bottom: 5px; }
+  .guide-sub-desc { font-size: 12px; color: var(--ink-faint); font-style: italic; line-height: 1.4; }
+
+  /* GUIDE MÉDICAL — ancien (gardé pour compatibilité modale) */
+  .guide-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+  .guide-card { background: var(--paper-dark); border: 2px solid var(--border); border-radius: 6px; padding: 28px 20px 22px; cursor: pointer; text-align: center; transition: all 0.18s; position: relative; overflow: hidden; }
+  .guide-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--accent); }
+  .guide-card:hover { border-color: var(--accent); box-shadow: 0 4px 18px rgba(122,26,26,0.18); transform: translateY(-2px); }
+  .guide-card-icon { font-size: 40px; margin-bottom: 12px; line-height: 1; }
+  .guide-card-title { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--ink); margin-bottom: 6px; font-weight: 600; }
+  .guide-card-sub { font-size: 13px; color: var(--ink-faint); font-style: italic; }
+  .guide-proc-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--accent); margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+  .guide-section { margin-bottom: 16px; }
+  .guide-section-head { display: flex; align-items: center; gap: 8px; font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ink); margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+  .guide-steps { list-style: none; padding: 0; margin: 0; }
+  .guide-steps li { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; font-size: 15px; color: var(--ink-light); font-family: 'Crimson Text', serif; line-height: 1.5; }
+  .guide-steps li::before { content: '—'; color: var(--border-dark); flex-shrink: 0; }
+  .guide-warn { background: #f5e6c8; border: 1px solid #c4a060; border-radius: 3px; padding: 8px 12px; font-size: 13px; color: #5a3a10; margin: 8px 0; }
+  .guide-warn-red { background: #f0d4d4; border: 1px solid #c09090; border-radius: 3px; padding: 8px 12px; font-size: 13px; color: #5a1a1a; margin: 8px 0; }
+  .guide-reco { background: var(--paper-dark); border-left: 3px solid var(--green-old); padding: 10px 14px; border-radius: 0 3px 3px 0; }
+  .guide-reco li { color: var(--ink-light); }
+
+  @media (max-width: 640px) {
+    .sidebar { width: 56px; min-width: 56px; }
+
+    .sidebar-header h1, .sidebar-header p, .nav-label, .nav-item span, .sidebar-footer { display: none; }
+    .nav-item { padding: 12px; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-cross">✚</div>
+  <div class="lock-title">Cabinet de Rhodes</div>
+  <div class="lock-sub">Louisiane, 1904 — Accès restreint</div>
+  <div class="lock-box">
+    <div class="lock-label">Code d'accès</div>
+    <input class="lock-input" id="lock-input" type="password" maxlength="6" placeholder="••••" onkeydown="if(event.key==='Enter')verifierLock()">
+    <div class="lock-error" id="lock-error"></div>
+    <button class="lock-btn" onclick="verifierLock()"><i class="ti ti-lock-open"></i> Déverrouiller</button>
+  </div>
+  <div class="lock-ornament">— ✦ —</div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-cross">✚</div>
+  <div class="loading-text">Connexion aux registres du cabinet…</div>
+</div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="cross">✚</div>
+      <h1>Cabinet de Rhodes</h1>
+      <p>Louisiane, 1904</p>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i><span>Tableau de bord</span></div>
+      <div class="nav-item" onclick="showPage('annuaire',this)"><i class="ti ti-address-book"></i><span>Annuaire</span></div>
+      <div class="nav-item" onclick="showPage('stocks',this)"><i class="ti ti-flask"></i><span>Stocks</span></div>
+      <div class="nav-item" onclick="showPage('comptabilite',this)"><i class="ti ti-report-money"></i><span>Comptabilité</span></div>
+      <div class="nav-item" onclick="showPage('employes',this)"><i class="ti ti-users"></i><span>Employés</span></div>
+      <div class="nav-item" onclick="showPage('contrats',this)"><i class="ti ti-file-certificate"></i><span>Contrats</span></div>
+      <div class="nav-item" onclick="showPage('blocnotes',this)"><i class="ti ti-pencil"></i><span>Bloc-notes</span></div>
+      <div class="nav-item" onclick="showPage('guide',this)"><i class="ti ti-book-2"></i><span>Guide médical</span></div>
+      <div class="nav-item" onclick="window.open('https://testdaptitude.netlify.app/','_blank')"><i class="ti ti-stethoscope"></i><span>Test d'aptitude</span></div>
+      <div class="nav-item" onclick="showPage('journal',this)"><i class="ti ti-notebook"></i><span>Journal</span></div>
+    </div>
+    <div class="sidebar-footer">Est. 1904</div>
+  </nav>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title"><i class="ti ti-layout-dashboard"></i><span>Tableau de bord</span></div>
+      <div class="topbar-right">
+        <div class="sync-badge">
+          <div class="sync-dot" id="sync-dot"></div>
+          <span id="sync-label">Connexion…</span>
+        </div>
+        <div class="topbar-date" id="topbar-date"></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="ornament">— ✦ —</div>
+        <div class="metrics" id="dash-metrics"></div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>Stocks critiques</h3>
+            <button class="btn-outline" onclick="showPage('stocks',document.querySelectorAll('.nav-item')[1])"><i class="ti ti-arrow-right"></i> Voir tout</button>
+          </div>
+          <table><thead><tr><th>Article</th><th>Quantité</th><th>Statut</th></tr></thead><tbody id="dash-stocks-table"></tbody></table>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><h3>Aperçu financier</h3></div>
+          <div style="padding:16px 20px 8px;">
+            <div class="bar-chart" id="dash-chart"></div>
+            <div style="display:flex;gap:8px;" id="dash-chart-labels"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STOCKS -->
+      <div class="page" id="page-stocks">
+        <div class="ornament">— ✦ —</div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <h3>Inventaire médical</h3>
+            <button class="btn" onclick="openModal('modal-stock')"><i class="ti ti-plus"></i> Ajouter article</button>
+          </div>
+          <table>
+            <thead><tr><th>Article</th><th>Catégorie</th><th>Quantité</th><th>Seuil</th><th>Statut</th><th style="text-align:center">Actions</th></tr></thead>
+            <tbody id="stocks-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- COMPTABILITE -->
+      <div class="page" id="page-comptabilite">
+        <div class="ornament">— ✦ —</div>
+        <div class="metrics" id="compta-metrics"></div>
+        <div style="display:flex;gap:10px;margin-bottom:20px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-soin" onclick="ouvrirModalSoin()"><i class="ti ti-heart-plus"></i> Faire un soin <span style="font-size:12px;opacity:0.8;font-family:'Crimson Text',serif;">+$2.00</span></button>
+          <button class="btn" onclick="openModal('modal-transaction')"><i class="ti ti-plus"></i> Autre transaction</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;"><h3>Transactions financières</h3><button class="btn btn-sm" style="background:#5a3a10;color:var(--paper)" onclick="demanderCode(clearTransactions)"><i class="ti ti-trash"></i> Effacer</button></div>
+          <table><thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Montant</th><th>Solde</th><th style="text-align:center">Action</th></tr></thead><tbody id="compta-table"></tbody></table>
+        </div>
+      </div>
+
+      <!-- EMPLOYES -->
+      <div class="page" id="page-employes">
+        <div class="ornament">— ✦ —</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <button class="btn" onclick="openModal('modal-employe')"><i class="ti ti-user-plus"></i> Ajouter un employé</button>
+          <button class="btn btn-sm" style="background:#5a3a10;color:var(--paper)" onclick="demanderCode(clearHeures)"><i class="ti ti-clock-off"></i> Effacer les heures</button>
+        </div>
+        <div class="emp-total-hours">
+          <div><div class="label">Total heures travaillées (semaine)</div><div class="value" id="total-heures">0h 00min</div></div>
+        </div>
+        <div id="employes-list"></div>
+      </div>
+
+      <!-- CONTRATS -->
+      <div class="page" id="page-contrats">
+        <div class="ornament">— ✦ —</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="contrats-filtres">
+            <button class="btn-outline btn-sm filtre-contrat active-filtre" onclick="filtrerContrats('tous',this)"><i class="ti ti-list"></i> Tous</button>
+            <button class="btn-outline btn-sm filtre-contrat" onclick="filtrerContrats('actif',this)"><i class="ti ti-check"></i> Actifs</button>
+            <button class="btn-outline btn-sm filtre-contrat" onclick="filtrerContrats('suspendu',this)"><i class="ti ti-pause"></i> Suspendus</button>
+            <button class="btn-outline btn-sm filtre-contrat" onclick="filtrerContrats('termine',this)"><i class="ti ti-x"></i> Terminés</button>
+          </div>
+          <button class="btn" onclick="openModal('modal-contrat')"><i class="ti ti-plus"></i> Nouveau contrat</button>
+        </div>
+        <div class="emp-total-hours" style="margin-bottom:16px;">
+          <div><div class="label">Contrats actifs</div><div class="value" id="stat-contrats-actifs">0</div></div>
+          <div><div class="label">Valeur totale</div><div class="value" id="stat-contrats-valeur" style="color:var(--green-old)">$0.00</div></div>
+          <div><div class="label">Total contrats</div><div class="value" id="stat-contrats-total" style="color:var(--ink-faint);font-size:18px;">0</div></div>
+        </div>
+        <div id="contrats-list"></div>
+      </div>
+
+      <!-- BLOC-NOTES -->
+      <div class="page" id="page-blocnotes">
+        <div class="ornament">— ✦ —</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div style="font-family:'IM Fell English',serif;font-size:14px;color:var(--ink-faint);font-style:italic;">Messages visibles par tous les employés du Cabinet de Rhodes</div>
+          <button class="btn" onclick="openModalNote()"><i class="ti ti-plus"></i> Nouvelle note</button>
+        </div>
+        <div id="blocnotes-list"></div>
+      </div>
+
+      <!-- JOURNAL -->
+      <div class="page" id="page-journal">
+        <div class="ornament">— ✦ —</div>
+        <div class="table-wrap">
+          <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <h3>Journal des opérations</h3>
+            <button class="btn btn-sm" style="background:#5a3a10;color:var(--paper)" onclick="demanderCode(clearJournal)"><i class="ti ti-trash"></i> Effacer le journal</button>
+          </div>
+          <div id="journal-list"></div>
+        </div>
+      </div>
+
+      <!-- ANNUAIRE -->
+      <div class="page" id="page-annuaire">
+        <div class="ornament">— ✦ —</div>
+        <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;position:relative;">
+            <i class="ti ti-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-faint);font-size:15px;pointer-events:none;"></i>
+            <input id="annuaire-search" placeholder="Rechercher par nom, Telegram ou métier…" style="background:var(--paper-dark);border:1px solid var(--border);border-radius:3px;padding:8px 10px 8px 34px;font-family:'Crimson Text',serif;font-size:15px;color:var(--ink);outline:none;width:100%;">
+          </div>
+          <button class="btn" onclick="openModal('modal-contact')"><i class="ti ti-user-plus"></i> Ajouter un contact</button>
+        </div>
+        <div id="contacts-list"></div>
+      </div>
+
+      <!-- GUIDE MÉDICAL -->
+      <div class="page" id="page-guide">
+        <div class="ornament">— ✦ —</div>
+        <div style="font-family:'IM Fell English',serif;font-size:15px;color:var(--ink-faint);font-style:italic;margin-bottom:28px;text-align:center;">
+          Protocoles médicaux du Cabinet de Rhodes — Louisiane, 1904
+        </div>
+
+        <!-- SECTION 1 : BOBOLOGIE & BRÛLURES -->
+        <div class="guide-big-section" id="gsec-bobo">
+          <div class="guide-big-header" onclick="toggleGuideSection('bobo')">
+            <div class="guide-big-left">
+              <span class="guide-big-emoji">🩹</span>
+              <div>
+                <div class="guide-big-title">Bobologie &amp; Brûlures</div>
+                <div class="guide-big-sub">Chocs, égratignures, brûlures, morsures venimeuses</div>
+              </div>
+            </div>
+            <span class="guide-big-arrow" id="garrow-bobo">▼</span>
+          </div>
+          <div class="guide-big-body" id="gbody-bobo" style="display:none;">
+            <div class="guide-sub-grid">
+              <div class="guide-sub-card" onclick="ouvrirGuide('choc')">
+                <span class="guide-sub-icon">💥</span>
+                <div class="guide-sub-title">Choc</div>
+                <div class="guide-sub-desc">Arnica &amp; surveillance cérébrale</div>
+              </div>
+              <div class="guide-sub-card" onclick="ouvrirGuide('egratignure')">
+                <span class="guide-sub-icon">🩸</span>
+                <div class="guide-sub-title">Égratignures</div>
+                <div class="guide-sub-desc">Rinçage, désinfection &amp; cataplasme</div>
+              </div>
+              <div class="guide-sub-card" onclick="ouvrirGuide('brulure')">
+                <span class="guide-sub-icon">🔥</span>
+                <div class="guide-sub-title">Brûlure</div>
+                <div class="guide-sub-desc">Rinçage eau claire &amp; aloé vera</div>
+              </div>
+              <div class="guide-sub-card" onclick="ouvrirGuide('morsure_venimeuse')">
+                <span class="guide-sub-icon">🐍</span>
+                <div class="guide-sub-title">Morsure venimeuse</div>
+                <div class="guide-sub-desc">Serpents — cataplasme au charbon</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2 : CHIRURGIE LÉGÈRE -->
+        <div class="guide-big-section" id="gsec-legere">
+          <div class="guide-big-header" onclick="toggleGuideSection('legere')">
+            <div class="guide-big-left">
+              <span class="guide-big-emoji">🔪</span>
+              <div>
+                <div class="guide-big-title">Chirurgie Légère</div>
+                <div class="guide-big-sub">Interventions non-invasives, pronostic vital non engagé</div>
+              </div>
+            </div>
+            <span class="guide-big-arrow" id="garrow-legere">▼</span>
+          </div>
+          <div class="guide-big-body" id="gbody-legere" style="display:none;">
+            <div class="guide-sub-grid">
+              <div class="guide-sub-card" onclick="ouvrirGuide('chir_legere_bases')">
+                <span class="guide-sub-icon">📋</span>
+                <div class="guide-sub-title">Les bases</div>
+                <div class="guide-sub-desc">Protocoles avant &amp; après intervention</div>
+              </div>
+              <div class="guide-sub-card" onclick="ouvrirGuide('retrait_balle_legere')">
+                <span class="guide-sub-icon">🔫</span>
+                <div class="guide-sub-title">Retrait de balle</div>
+                <div class="guide-sub-desc">Extraction superficielle &amp; suture</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3 : CHIRURGIE LOURDE -->
+        <div class="guide-big-section" id="gsec-lourde">
+          <div class="guide-big-header" onclick="toggleGuideSection('lourde')">
+            <div class="guide-big-left">
+              <span class="guide-big-emoji">🏥</span>
+              <div>
+                <div class="guide-big-title">Chirurgie Lourde</div>
+                <div class="guide-big-sub">Interventions invasives, pronostic vital engagé</div>
+              </div>
+            </div>
+            <span class="guide-big-arrow" id="garrow-lourde">▼</span>
+          </div>
+          <div class="guide-big-body" id="gbody-lourde" style="display:none;">
+            <div class="guide-sub-grid">
+              <div class="guide-sub-card" onclick="ouvrirGuide('chir_lourde_bases')">
+                <span class="guide-sub-icon">📋</span>
+                <div class="guide-sub-title">Les bases</div>
+                <div class="guide-sub-desc">Anesthésie &amp; protocoles généraux</div>
+              </div>
+              <div class="guide-sub-card" onclick="ouvrirGuide('balle_profonde')">
+                <span class="guide-sub-icon">🔫</span>
+                <div class="guide-sub-title">Retrait de balles profondes</div>
+                <div class="guide-sub-desc">Muscle, gras, péritoine</div>
+              </div>
+              <div class="guide-sub-card" onclick="ouvrirGuide('ponction_pleurale')">
+                <span class="guide-sub-icon">🫁</span>
+                <div class="guide-sub-title">Ponction pleurale</div>
+                <div class="guide-sub-desc">Drainage de la cavité pleurale</div>
+              </div>
+              <div class="guide-sub-card" onclick="ouvrirGuide('fractures')">
+                <span class="guide-sub-icon">🦴</span>
+                <div class="guide-sub-title">Fractures</div>
+                <div class="guide-sub-desc">Ouvertes &amp; simples — réduction &amp; plâtre</div>
+              </div>
+              <div class="guide-sub-card" onclick="ouvrirGuide('enucleation')">
+                <span class="guide-sub-icon">👁️</span>
+                <div class="guide-sub-title">Énucléation</div>
+                <div class="guide-sub-desc">Retrait complet de l'œil</div>
+              </div>
+              <div class="guide-sub-card" onclick="ouvrirGuide('trepanation')">
+                <span class="guide-sub-icon">🧠</span>
+                <div class="guide-sub-title">Trépanation</div>
+                <div class="guide-sub-desc">Traumatisme crânien &amp; hémorragie cérébrale</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GUIDE -->
+<div class="modal-overlay" id="modal-guide">
+  <div class="modal" style="width:560px;max-height:90vh;overflow-y:auto;">
+    <button class="close-modal" onclick="closeModal('modal-guide')"><i class="ti ti-x"></i></button>
+    <div id="guide-modal-content"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-stock">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal('modal-stock')"><i class="ti ti-x"></i></button>
+    <h3>Nouvel article</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="form-row">
+      <div class="form-group"><label>Nom de l'article</label><input id="s-nom" placeholder="Laudanum, Bandages…"></div>
+      <div class="form-group"><label>Catégorie</label>
+        <select id="s-cat"><option>Médicaments</option><option>Chirurgie</option><option>Soins</option><option>Équipement</option><option>Consommables</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Quantité</label><input id="s-qte" type="number" min="0" placeholder="0"></div>
+      <div class="form-group"><label>Seuil d'alerte</label><input id="s-seuil" type="number" min="0" placeholder="5"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-stock')">Annuler</button>
+      <button class="btn" onclick="addStock()"><i class="ti ti-check"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RETRAIT -->
+<div class="modal-overlay" id="modal-retrait">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal('modal-retrait')"><i class="ti ti-x"></i></button>
+    <h3 id="retrait-title">Retirer du stock</h3><div class="ornament-sm">— ✦ —</div>
+    <div style="background:var(--paper-dark);border:1px solid var(--border);border-radius:3px;padding:10px 14px;margin-bottom:16px;font-style:italic;color:var(--ink-faint);font-size:14px;" id="retrait-info"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Quantité à retirer</label><input id="r-qte" type="number" min="1" placeholder="1"></div>
+      <div class="form-group"><label>Motif</label>
+        <select id="r-motif"><option>Consultation / Soin</option><option>Chirurgie</option><option>Usage interne</option><option>Périmé / Cassé</option><option>Autre</option></select>
+      </div>
+    </div>
+    <div class="form-row full"><div class="form-group"><label>Note (optionnel)</label><input id="r-note" placeholder="Patient, détails…"></div></div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-retrait')">Annuler</button>
+      <button class="btn" onclick="confirmRetrait()"><i class="ti ti-minus"></i> Retirer</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL AJOUT STOCK -->
+<div class="modal-overlay" id="modal-ajout-stock">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal('modal-ajout-stock')"><i class="ti ti-x"></i></button>
+    <h3 id="ajout-title">Ajouter au stock</h3><div class="ornament-sm">— ✦ —</div>
+    <div style="background:var(--paper-dark);border:1px solid var(--border);border-radius:3px;padding:10px 14px;margin-bottom:16px;font-style:italic;color:var(--ink-faint);font-size:14px;" id="ajout-info"></div>
+    <div class="form-row full">
+      <div class="form-group"><label>Quantité à ajouter</label><input id="a-qte" type="number" min="1" placeholder="1"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-ajout-stock')">Annuler</button>
+      <button class="btn" style="background:var(--green-old)" onclick="confirmAjoutStock()"><i class="ti ti-plus"></i> Ajouter</button>
+    </div>
+  </div>
+</div>
+<!-- MODAL SUPPRIMER STOCK -->
+<div class="modal-overlay" id="modal-sup-stock">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal('modal-sup-stock')"><i class="ti ti-x"></i></button>
+    <h3>Supprimer l'article</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="confirm-box">Cette action retirera définitivement <strong id="sup-stock-nom"></strong> de l'inventaire.</div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-sup-stock')">Annuler</button>
+      <button class="btn" onclick="confirmerSupStock()"><i class="ti ti-trash"></i> Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TRANSACTION -->
+<div class="modal-overlay" id="modal-transaction">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal('modal-transaction')"><i class="ti ti-x"></i></button>
+    <h3>Nouvelle transaction</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="form-row full"><div class="form-group"><label>Description</label><input id="t-desc" placeholder="Consultation, Achat fournitures…"></div></div>
+    <div class="form-row">
+      <div class="form-group"><label>Type</label><select id="t-type"><option value="income">Revenu</option><option value="expense">Dépense</option></select></div>
+      <div class="form-group"><label>Montant ($)</label><input id="t-montant" type="number" min="0" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-transaction')">Annuler</button>
+      <button class="btn" onclick="addTransaction()"><i class="ti ti-check"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EMPLOYE -->
+<div class="modal-overlay" id="modal-employe">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal('modal-employe')"><i class="ti ti-x"></i></button>
+    <h3>Nouvel employé</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="form-row">
+      <div class="form-group"><label>Prénom</label><input id="e-prenom" placeholder="Elijah…"></div>
+      <div class="form-group"><label>Nom</label><input id="e-nom" placeholder="Cross…"></div>
+    </div>
+    <div class="form-row full"><div class="form-group"><label>Poste</label>
+      <select id="e-poste"><option>Chef de Cabinet</option><option>Médecin Référent</option><option>Médecin</option><option>Apprentie Médecin</option><option>Stagiaire</option></select>
+    </div></div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-employe')">Annuler</button>
+      <button class="btn" onclick="demanderCode(addEmploye)"><i class="ti ti-check"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SUP EMPLOYE -->
+<div class="modal-overlay" id="modal-sup-emp">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal('modal-sup-emp')"><i class="ti ti-x"></i></button>
+    <h3>Renvoyer l'employé</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="confirm-box">Voulez-vous retirer <strong id="sup-emp-nom"></strong> du registre ?</div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-sup-emp')">Annuler</button>
+      <button class="btn" onclick="demanderCode(confirmerSupEmp)"><i class="ti ti-user-minus"></i> Confirmer</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL SOIN -->
+<div class="modal-overlay" id="modal-soin">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal('modal-soin')"><i class="ti ti-x"></i></button>
+    <h3>Faire un soin</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="form-row full"><div class="form-group"><label>Employé ayant effectué le soin</label>
+      <select id="soin-employe"></select>
+    </div></div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-soin')">Annuler</button>
+      <button class="btn-soin" onclick="confirmerSoin()"><i class="ti ti-heart-plus"></i> Enregistrer — +$2.00</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CODE -->
+<div class="modal-overlay" id="modal-code">
+  <div class="modal" style="max-width:340px;">
+    <button class="close-modal" onclick="closeModal('modal-code');pendingAction=null"><i class="ti ti-x"></i></button>
+    <h3>Code requis</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="form-row full"><div class="form-group"><label>Entrez le code d'accès</label>
+      <input id="code-input" type="password" placeholder="••••" maxlength="6" style="letter-spacing:4px;font-size:20px;text-align:center;" onkeydown="if(event.key==='Enter')verifierCode()">
+    </div></div>
+    <div id="code-error" style="color:var(--accent);font-size:13px;margin-top:4px;display:none;">Code incorrect.</div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-code');pendingAction=null">Annuler</button>
+      <button class="btn" onclick="verifierCode()"><i class="ti ti-lock-open"></i> Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTACT -->
+<div class="modal-overlay" id="modal-contact">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal('modal-contact')"><i class="ti ti-x"></i></button>
+    <h3>Nouveau contact</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="form-row full"><div class="form-group"><label>Nom</label><input id="c-nom" placeholder="Jean Dupont…"></div></div>
+    <div class="form-row full"><div class="form-group"><label>Telegram</label><input id="c-telegram" placeholder="@username…"></div></div>
+    <div class="form-row full"><div class="form-group"><label>Emploi <span style="color:var(--ink-faint);font-style:italic">(optionnel)</span></label><input id="c-emploi" placeholder="Médecin, Forgeron…"></div></div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-contact')">Annuler</button>
+      <button class="btn" onclick="addContact()"><i class="ti ti-check"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SUP CONTACT -->
+<div class="modal-overlay" id="modal-sup-contact">
+  <div class="modal" style="max-width:360px;">
+    <button class="close-modal" onclick="closeModal('modal-sup-contact')"><i class="ti ti-x"></i></button>
+    <h3>Supprimer le contact</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="confirm-box">Supprimer <strong id="sup-contact-nom"></strong> de l'annuaire ?</div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-sup-contact')">Annuler</button>
+      <button class="btn" onclick="confirmerSupContact()"><i class="ti ti-trash"></i> Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONTRAT -->
+<div class="modal-overlay" id="modal-contrat">
+  <div class="modal" style="width:540px;">
+    <button class="close-modal" onclick="closeModal('modal-contrat')"><i class="ti ti-x"></i></button>
+    <h3>Nouveau contrat</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="form-row">
+      <div class="form-group"><label>Intitulé du contrat</label><input id="ct-titre" placeholder="Accord de soins, Prestation…"></div>
+      <div class="form-group"><label>Partie contractante</label><input id="ct-partie" placeholder="Nom, Organisation…"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Type</label>
+        <select id="ct-type"><option>Prestation de soins</option><option>Fourniture</option><option>Partenariat</option><option>Emploi</option><option>Location</option><option>Autre</option></select>
+      </div>
+      <div class="form-group"><label>Statut</label>
+        <select id="ct-statut"><option value="actif">Actif</option><option value="suspendu">Suspendu</option><option value="termine">Terminé</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date de début</label><input id="ct-debut" type="date"></div>
+      <div class="form-group"><label>Date d'échéance</label><input id="ct-echeance" type="date"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Montant ($)</label><input id="ct-montant" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label>Fréquence de paiement</label>
+        <select id="ct-frequence"><option>Unique</option><option>Hebdomadaire</option><option>Mensuel</option><option>Annuel</option></select>
+      </div>
+    </div>
+    <div class="form-row full"><div class="form-group"><label>Clauses & notes</label>
+      <textarea id="ct-clauses" rows="4" style="background:var(--paper-dark);border:1px solid var(--border);border-radius:3px;padding:8px 10px;font-family:'Crimson Text',serif;font-size:14px;color:var(--ink);resize:vertical;outline:none;width:100%;" placeholder="Conditions particulières, obligations, remarques…"></textarea>
+    </div></div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-contrat')">Annuler</button>
+      <button class="btn" onclick="addContrat()"><i class="ti ti-check"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT CONTRAT -->
+<div class="modal-overlay" id="modal-edit-contrat">
+  <div class="modal" style="width:540px;">
+    <button class="close-modal" onclick="closeModal('modal-edit-contrat')"><i class="ti ti-x"></i></button>
+    <h3>Modifier le contrat</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="form-row">
+      <div class="form-group"><label>Intitulé</label><input id="ect-titre" placeholder="Accord de soins…"></div>
+      <div class="form-group"><label>Partie contractante</label><input id="ect-partie" placeholder="Nom…"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Type</label>
+        <select id="ect-type"><option>Prestation de soins</option><option>Fourniture</option><option>Partenariat</option><option>Emploi</option><option>Location</option><option>Autre</option></select>
+      </div>
+      <div class="form-group"><label>Statut</label>
+        <select id="ect-statut"><option value="actif">Actif</option><option value="suspendu">Suspendu</option><option value="termine">Terminé</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date de début</label><input id="ect-debut" type="date"></div>
+      <div class="form-group"><label>Date d'échéance</label><input id="ect-echeance" type="date"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Montant ($)</label><input id="ect-montant" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label>Fréquence</label>
+        <select id="ect-frequence"><option>Unique</option><option>Hebdomadaire</option><option>Mensuel</option><option>Annuel</option></select>
+      </div>
+    </div>
+    <div class="form-row full"><div class="form-group"><label>Clauses & notes</label>
+      <textarea id="ect-clauses" rows="4" style="background:var(--paper-dark);border:1px solid var(--border);border-radius:3px;padding:8px 10px;font-family:'Crimson Text',serif;font-size:14px;color:var(--ink);resize:vertical;outline:none;width:100%;"></textarea>
+    </div></div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-edit-contrat')">Annuler</button>
+      <button class="btn" onclick="saveEditContrat()"><i class="ti ti-check"></i> Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SUP CONTRAT -->
+<div class="modal-overlay" id="modal-sup-contrat">
+  <div class="modal" style="max-width:380px;">
+    <button class="close-modal" onclick="closeModal('modal-sup-contrat')"><i class="ti ti-x"></i></button>
+    <h3>Résilier le contrat</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="confirm-box">Cette action supprimera définitivement le contrat <strong id="sup-contrat-nom"></strong>.</div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-sup-contrat')">Annuler</button>
+      <button class="btn" onclick="demanderCode(confirmerSupContrat)"><i class="ti ti-trash"></i> Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOTE -->
+<div class="modal-overlay" id="modal-note">
+  <div class="modal" style="width:520px;">
+    <button class="close-modal" onclick="closeModal('modal-note')"><i class="ti ti-x"></i></button>
+    <h3>Nouvelle note</h3><div class="ornament-sm">— ✦ —</div>
+    <div class="form-row">
+      <div class="form-group"><label>Auteur</label>
+        <select id="n-auteur"></select>
+      </div>
+      <div class="form-group"><label>Priorité</label>
+        <select id="n-priority">
+          <option value="info">ℹ Info</option>
+          <option value="normale" selected>📌 Normale</option>
+          <option value="haute">⚠ Urgente</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row full"><div class="form-group"><label>Titre</label><input id="n-titre" placeholder="Sujet de la note…"></div></div>
+    <div class="form-row full"><div class="form-group"><label>Message</label>
+      <textarea id="n-texte" rows="5" style="background:var(--paper-dark);border:1px solid var(--border);border-radius:3px;padding:8px 10px;font-family:'Crimson Text',serif;font-size:15px;color:var(--ink);resize:vertical;outline:none;width:100%;" placeholder="Rédigez votre message ici…"></textarea>
+    </div></div>
+    <div class="form-row full"><div class="form-group"><label>Étiquettes <span style="color:var(--ink-faint);font-style:italic">(séparées par virgule)</span></label>
+      <input id="n-tags" placeholder="Urgent, Stock, Réunion…">
+    </div></div>
+    <div class="form-actions">
+      <button class="btn-outline" onclick="closeModal('modal-note')">Annuler</button>
+      <button class="btn" onclick="addNote()"><i class="ti ti-check"></i> Publier</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── CONFIG FIREBASE ─────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBrgzF3hh77v6N9NsBX1ERZcmtFJj-SRls",
+  authDomain: "mdtrhodes.firebaseapp.com",
+  projectId: "mdtrhodes",
+  storageBucket: "mdtrhodes.firebasestorage.app",
+  messagingSenderId: "529709191510",
+  appId: "1:529709191510:web:42c6661fcbdfa00d9086f7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const DOC_REF = doc(db, "cabinet", "state");
+
+// ── ÉTAT PAR DÉFAUT ─────────────────────────────────────────────────────────
+const DEFAULT_STATE = {
+  stocks: [
+    { nom: 'Laudanum',         cat: 'Médicaments',  qte: 3,  seuil: 5,  four: "MacFarlane's" },
+    { nom: 'Bandages de coton',cat: 'Soins',         qte: 24, seuil: 10, four: 'Van Horn Supplies' },
+    { nom: 'Chloroforme',      cat: 'Chirurgie',     qte: 2,  seuil: 4,  four: "MacFarlane's" },
+    { nom: 'Scalpels',         cat: 'Équipement',    qte: 7,  seuil: 3,  four: 'Rhodes Ferr.' },
+    { nom: 'Morphine',         cat: 'Médicaments',   qte: 1,  seuil: 3,  four: "MacFarlane's" },
+    { nom: 'Catgut (suture)',  cat: 'Chirurgie',     qte: 12, seuil: 5,  four: 'Van Horn Supplies' },
+    { nom: 'Alcool médical',   cat: 'Consommables',  qte: 8,  seuil: 6,  four: 'Saloon Rhodes' },
+  ],
+  transactions: [],
+  employes: [
+    { prenom: 'Thomas', nom: 'Whitmore', poste: 'Chef de Cabinet', enService: false, debutService: null, totalMinutes: 0 },
+    { prenom: 'Clara',  nom: 'Holt',     poste: 'Médecin', enService: false, debutService: null, totalMinutes: 0 },
+  ],
+  journal: [],
+  contacts: [],
+  contrats: [],
+  notes: []
+};
+
+let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+let retraitIndex = -1, supStockIndex = -1, supEmpIndex = -1;
+let isSaving = false;
+let lastSaveAt = 0; // timestamp ms de notre dernière sauvegarde
+
+// ── DATE TOPBAR ─────────────────────────────────────────────────────────────
+const MONTHS = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
+const now = new Date();
+document.getElementById('topbar-date').textContent = MONTHS[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+
+// ── SYNC UI ─────────────────────────────────────────────────────────────────
+function setSyncStatus(status, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot' + (status !== 'ok' ? ' ' + status : ' connected');
+  lbl.textContent = label;
+}
+
+// ── FIREBASE SAVE ────────────────────────────────────────────────────────────
+async function saveState() {
+  isSaving = true;
+  setSyncStatus('saving', 'Sauvegarde…');
+  try {
+    await setDoc(DOC_REF, state);
+    lastSaveAt = Date.now(); // marquer l'heure exacte de notre sauvegarde
+    setSyncStatus('ok', 'Synchronisé');
+  } catch(e) {
+    console.error(e);
+    setSyncStatus('error', 'Erreur réseau');
+  }
+  isSaving = false;
+}
+
+// ── FIREBASE LISTENER (temps réel) ──────────────────────────────────────────
+function startListener() {
+  onSnapshot(DOC_REF, (snap) => {
+    // Ignorer uniquement l'écho de notre propre sauvegarde (dans les 2 secondes)
+    if (isSaving) return;
+    if (Date.now() - lastSaveAt < 2000) return;
+    if (snap.exists()) {
+      const data = snap.data();
+      state = {
+        stocks:       data.stocks       ?? DEFAULT_STATE.stocks,
+        transactions: data.transactions ?? [],
+        contacts:     data.contacts      ?? [],
+        employes:     (data.employes     ?? DEFAULT_STATE.employes).map(e => ({
+          ...e,
+          totalMinutes: (e.totalMinutes == null || e.totalMinutes < 0) ? 0 : e.totalMinutes,
+          enService: e.enService || false,
+          debutService: (e.debutService && typeof e.debutService === 'object' && e.debutService.toMillis)
+            ? e.debutService.toMillis()
+            : (e.debutService ? Number(e.debutService) : null)
+        })),
+        journal:      data.journal      ?? [],
+        contrats:     data.contrats     ?? [],
+        notes:        data.notes        ?? []
+      };
+      renderAll();
+      setSyncStatus('ok', 'Synchronisé');
+    }
+  }, (err) => {
+    console.error(err);
+    setSyncStatus('error', 'Erreur connexion');
+  });
+}
+
+// ── INITIALISATION ───────────────────────────────────────────────────────────
+function hideLoading() {
+  const overlay = document.getElementById('loading-overlay');
+  overlay.classList.add('hidden');
+  setTimeout(() => overlay.style.display = 'none', 600);
+}
+
+async function init() {
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000));
+  try {
+    const snap = await Promise.race([getDoc(DOC_REF), timeout]);
+    if (snap.exists()) {
+      const data = snap.data();
+      state = {
+        stocks:       data.stocks       ?? DEFAULT_STATE.stocks,
+        transactions: data.transactions ?? [],
+        contacts:     data.contacts      ?? [],
+        employes:     (data.employes     ?? DEFAULT_STATE.employes).map(e => ({
+          ...e,
+          totalMinutes: (e.totalMinutes == null || e.totalMinutes < 0) ? 0 : e.totalMinutes,
+          enService: e.enService || false,
+          debutService: (e.debutService && typeof e.debutService === 'object' && e.debutService.toMillis)
+            ? e.debutService.toMillis()
+            : (e.debutService ? Number(e.debutService) : null)
+        })),
+        journal:      data.journal      ?? [],
+        contrats:     data.contrats     ?? [],
+        notes:        data.notes        ?? []
+      };
+    } else {
+      await setDoc(DOC_REF, state);
+    }
+    renderAll();
+    setSyncStatus('ok', 'Synchronisé');
+    hideLoading();
+    startListener();
+  } catch(e) {
+    console.error('Init error:', e);
+    renderAll();
+    setSyncStatus('error', e.message === 'timeout' ? 'Hors ligne' : 'Erreur connexion');
+    hideLoading();
+  }
+}
+
+// ── UTILITAIRES ──────────────────────────────────────────────────────────────
+function today() { return new Date().toISOString().slice(0,10); }
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + (type||''); t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function getStatusBadge(qte, seuil) {
+  if (qte === 0) return '<span class="badge badge-red">Épuisé</span>';
+  if (qte <= seuil) return '<span class="badge badge-amber">Critique</span>';
+  return '<span class="badge badge-green">Normal</span>';
+}
+function getStatusColor(qte, seuil) {
+  if (qte === 0) return '#c0392b';
+  if (qte <= seuil) return '#c97d10';
+  return '#3a5a3a';
+}
+function computeTotals() {
+  let income = 0, expense = 0;
+  state.transactions.forEach(t => { if (t.type==='income') income+=t.montant; else expense+=t.montant; });
+  return { income, expense, balance: income - expense };
+}
+
+// ── ACTIONS ──────────────────────────────────────────────────────────────────
+let pendingAction = null;
+const CODE_SECRET = '2203';
+const CODE_LOCK   = '6767';
+
+window.demanderCode = function demanderCode(action) {
+  pendingAction = action;
+  document.getElementById('code-input').value = '';
+  document.getElementById('code-error').style.display = 'none';
+  openModal('modal-code');
+  setTimeout(() => document.getElementById('code-input').focus(), 100);
+}
+
+window.verifierCode = function() {
+  const val = document.getElementById('code-input').value;
+  if (val === CODE_SECRET) {
+    closeModal('modal-code');
+    document.getElementById('code-error').style.display = 'none';
+    if (pendingAction) { pendingAction(); pendingAction = null; }
+  } else {
+    document.getElementById('code-error').style.display = 'block';
+    document.getElementById('code-input').value = '';
+  }
+};
+
+window.ouvrirTestAptitude = function() {
+  window.open('https://testdaptitude.netlify.app/', '_blank');
+};
+
+window.ouvrirModalSoin = function() {
+  const sel = document.getElementById('soin-employe');
+  sel.innerHTML = state.employes.length
+    ? state.employes.map(e => `<option>${e.prenom} ${e.nom} — ${e.poste}</option>`).join('')
+    : '<option>Aucun employé</option>';
+  openModal('modal-soin');
+};
+
+window.confirmerSoin = async function() {
+  const sel = document.getElementById('soin-employe');
+  const nom = sel.value || 'Inconnu';
+  const d = today();
+  state.transactions.push({ date: d, desc: 'Soin effectué par ' + nom, type: 'income', montant: 2.00 });
+  state.journal.unshift({ type: 'soin', desc: 'Soin — ' + nom + ' — +$2.00', date: d, detail: '+$2.00' });
+  closeModal('modal-soin');
+  renderAll(); showToast('Soin enregistré — +$2.00', 'success');
+  await saveState();
+};
+
+window.clearTransactions = async function() {
+  state.transactions = [];
+  state.journal.unshift({ type: 'expense', desc: 'Transactions effacées', date: today(), detail: 'reset' });
+  showToast('Transactions effacées.', 'success'); renderAll(); await saveState();
+};
+
+
+window.openAjoutModal = function(i) {
+  retraitIndex = i;
+  const s = state.stocks[i];
+  document.getElementById('ajout-title').textContent = 'Ajouter — ' + s.nom;
+  document.getElementById('ajout-info').textContent = 'Stock actuel : ' + s.qte + ' unité(s)  ·  Seuil : ' + s.seuil;
+  document.getElementById('a-qte').value = 1;
+  openModal('modal-ajout-stock');
+};
+
+window.confirmAjoutStock = async function() {
+  const s = state.stocks[retraitIndex];
+  const qte = parseInt(document.getElementById('a-qte').value)||0;
+  if (qte <= 0) { showToast('Quantité invalide.'); return; }
+  s.qte += qte;
+  const desc = 'Ajout ' + s.nom + ' ×' + qte;
+  state.journal.unshift({ type: 'stock-add', desc, date: today(), detail: '+'+qte+' unité(s)' });
+  closeModal('modal-ajout-stock');
+  showToast(qte + ' × ' + s.nom + ' ajouté(s).', 'success');
+  renderAll(); await saveState();
+};
+window.openRetraitModal = function(i) {
+  retraitIndex = i;
+  const s = state.stocks[i];
+  document.getElementById('retrait-title').textContent = 'Retirer — ' + s.nom;
+  document.getElementById('retrait-info').textContent = 'Stock actuel : ' + s.qte + ' unité(s)  ·  Seuil : ' + s.seuil;
+  document.getElementById('r-qte').value = 1;
+  document.getElementById('r-qte').max = s.qte;
+  document.getElementById('r-note').value = '';
+  openModal('modal-retrait');
+};
+
+window.confirmRetrait = async function() {
+  const s = state.stocks[retraitIndex];
+  const qte = parseInt(document.getElementById('r-qte').value)||0;
+  const motif = document.getElementById('r-motif').value;
+  const note = document.getElementById('r-note').value.trim();
+  if (qte <= 0) { showToast('Quantité invalide.'); return; }
+  if (qte > s.qte) { showToast('Stock insuffisant !'); return; }
+  s.qte -= qte;
+  const desc = 'Retrait ' + s.nom + ' ×' + qte + ' — ' + motif + (note?' ('+note+')':'');
+  state.journal.unshift({ type: 'stock-remove', desc, date: today(), detail: '−'+qte+' unité(s)' });
+  closeModal('modal-retrait');
+  if (s.qte === 0) showToast(s.nom + ' : stock épuisé !');
+  else if (s.qte <= s.seuil) showToast(s.nom + ' : stock critique (' + s.qte + ' restant(s))');
+  else showToast(qte + ' × ' + s.nom + ' retiré(s).', 'success');
+  renderAll(); await saveState();
+};
+
+window.openSupStock = function(i) {
+  supStockIndex = i;
+  document.getElementById('sup-stock-nom').textContent = state.stocks[i].nom;
+  openModal('modal-sup-stock');
+};
+window.confirmerSupStock = async function() {
+  const nom = state.stocks[supStockIndex].nom;
+  state.stocks.splice(supStockIndex, 1);
+  state.journal.unshift({ type: 'stock-remove', desc: 'Article supprimé : ' + nom, date: today(), detail: 'supprimé' });
+  closeModal('modal-sup-stock'); showToast(nom + ' supprimé.', 'success');
+  renderAll(); await saveState();
+};
+
+window.addStock = async function() {
+  const nom = document.getElementById('s-nom').value.trim();
+  if (!nom) return;
+  const cat = document.getElementById('s-cat').value;
+  const qte = parseInt(document.getElementById('s-qte').value)||0;
+  const seuil = parseInt(document.getElementById('s-seuil').value)||5;
+  state.stocks.push({ nom, cat, qte, seuil });
+  state.journal.unshift({ type: 'stock-add', desc: 'Ajout stock : '+nom+' ×'+qte, date: today(), detail: '+'+qte+' unité(s)' });
+  closeModal('modal-stock');
+  ['s-nom','s-qte','s-seuil'].forEach(id => document.getElementById(id).value='');
+  showToast(nom + ' ajouté.', 'success'); renderAll(); await saveState();
+};
+
+window.addTransaction = async function() {
+  const desc = document.getElementById('t-desc').value.trim();
+  const type = document.getElementById('t-type').value;
+  const montant = parseFloat(document.getElementById('t-montant').value)||0;
+  if (!desc || !montant) return;
+  state.transactions.push({ date: today(), desc, type, montant });
+  state.journal.unshift({ type, desc, date: today(), detail: (type==='income'?'+':'-')+'$'+montant.toFixed(2) });
+  closeModal('modal-transaction');
+  document.getElementById('t-desc').value=''; document.getElementById('t-montant').value='';
+  showToast('Transaction enregistrée.', 'success'); renderAll(); await saveState();
+};
+
+window.annulerTransaction = async function(i) {
+  const t = state.transactions[i];
+  if (!t) return;
+  const desc = t.desc;
+  state.transactions.splice(i, 1);
+  state.journal.unshift({ type: 'expense', desc: 'Transaction annulée : ' + desc, date: today(), detail: 'annulé' });
+  showToast('Transaction annulée.', 'success'); renderAll(); await saveState();
+};
+
+window.clearJournal = async function() {
+  state.journal = [];
+  showToast('Journal effacé.', 'success'); renderAll(); await saveState();
+};
+
+window.prendreService = async function(i) {
+  const e = state.employes[i];
+  if (e.enService) return;
+  e.enService = true;
+  e.debutService = Date.now();
+  state.journal.unshift({ type: 'stock-add', desc: e.prenom + ' ' + e.nom + ' — Début de service', date: today(), detail: 'en service' });
+  showToast(e.prenom + ' a pris son service.', 'success'); renderAll(); await saveState();
+};
+
+window.finirService = async function(i) {
+  const e = state.employes[i];
+  if (!e.enService || !e.debutService) return;
+  // Handle Firestore Timestamp objects or corrupted values
+  const debut = (typeof e.debutService === 'object' && e.debutService.toMillis)
+    ? e.debutService.toMillis()
+    : Number(e.debutService);
+  const mins = Math.floor((Date.now() - debut) / 60000);
+  // Cap at 24h per session to avoid corruption
+  const safeMins = (mins < 0 || mins > 1440) ? 0 : mins;
+  e.totalMinutes = (e.totalMinutes || 0) + safeMins;
+  e.enService = false;
+  e.debutService = null;
+  state.journal.unshift({ type: 'stock-remove', desc: e.prenom + ' ' + e.nom + ' — Fin de service', date: today(), detail: formatMinutes(mins) });
+  showToast(e.prenom + ' a terminé son service (' + formatMinutes(mins) + ').', 'success'); renderAll(); await saveState();
+};
+
+window.clearHeures = async function() {
+  state.employes.forEach(e => { e.totalMinutes = 0; e.enService = false; e.debutService = null; });
+  state.journal.unshift({ type: 'stock-remove', desc: 'Heures hebdomadaires remises à zéro', date: today(), detail: 'reset' });
+  showToast('Heures effacées.', 'success'); renderAll(); await saveState();
+};
+
+window.addEmploye = async function() {
+  const prenom = document.getElementById('e-prenom').value.trim();
+  const nom = document.getElementById('e-nom').value.trim();
+  if (!prenom||!nom) return;
+  const poste = document.getElementById('e-poste').value;
+  state.employes.push({ prenom, nom, poste });
+  closeModal('modal-employe');
+  ['e-prenom','e-nom'].forEach(id => document.getElementById(id).value='');
+  showToast(prenom+' '+nom+' ajouté.', 'success'); renderAll(); await saveState();
+};
+
+window.openSupEmp = function(i) {
+  supEmpIndex = i;
+  const e = state.employes[i];
+  document.getElementById('sup-emp-nom').textContent = e.prenom + ' ' + e.nom;
+  openModal('modal-sup-emp');
+};
+window.confirmerSupEmp = async function() {
+  const e = state.employes[supEmpIndex];
+  state.employes.splice(supEmpIndex, 1);
+  closeModal('modal-sup-emp'); showToast(e.prenom+' '+e.nom+' retiré.', 'success');
+  renderAll(); await saveState();
+};
+
+// ── RENDU ────────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const tot = computeTotals();
+  const critical = state.stocks.filter(s => s.qte <= s.seuil).length;
+  document.getElementById('dash-metrics').innerHTML = `
+    <div class="metric-card"><div class="label">Solde actuel</div><div class="value">$${tot.balance.toFixed(2)}</div><div class="sub">Trésorerie</div></div>
+    <div class="metric-card"><div class="label">Revenus</div><div class="value" style="color:var(--green-old)">$${tot.income.toFixed(2)}</div></div>
+    <div class="metric-card"><div class="label">Dépenses</div><div class="value">$${tot.expense.toFixed(2)}</div></div>
+    <div class="metric-card"><div class="label">Stocks critiques</div><div class="value">${critical}</div><div class="sub">Articles sous seuil</div></div>
+    <div class="metric-card"><div class="label">Employés</div><div class="value">${state.employes.length}</div></div>`;
+  const crit = state.stocks.filter(s => s.qte <= s.seuil);
+  document.getElementById('dash-stocks-table').innerHTML = crit.length
+    ? crit.map(s=>`<tr><td>${s.nom}</td><td>${s.qte} / ${s.seuil} min.</td><td>${getStatusBadge(s.qte,s.seuil)}</td></tr>`).join('')
+    : '<tr><td colspan="3" class="empty-state">Aucun stock critique</td></tr>';
+  const incomes = [0,0,0,0,0,tot.income];
+  const mx = Math.max(...incomes,1);
+  const labels = ['Avr','Mai','Juin','Juil','Août','Sep'];
+  document.getElementById('dash-chart').innerHTML = incomes.map(v=>`<div class="bar-wrap"><div class="bar" style="height:${Math.round(v/mx*100)}%"></div></div>`).join('');
+  document.getElementById('dash-chart-labels').innerHTML = labels.map(l=>`<div style="flex:1;text-align:center"><div class="bar-label">${l}</div></div>`).join('');
+}
+
+function renderStocks() {
+  document.getElementById('stocks-table').innerHTML = state.stocks.length
+    ? state.stocks.map((s,i)=>{
+        const pct = Math.min(100,Math.round((s.qte/Math.max(s.seuil*3,1))*100));
+        return `<tr>
+          <td><strong style="color:var(--ink)">${s.nom}</strong></td>
+          <td style="color:var(--ink-faint);font-style:italic">${s.cat}</td>
+          <td><span style="font-weight:600">${s.qte}</span><div class="stock-bar"><div class="stock-fill" style="width:${pct}%;background:${getStatusColor(s.qte,s.seuil)}"></div></div></td>
+          <td>${s.seuil}</td>
+          <td>${getStatusBadge(s.qte,s.seuil)}</td>
+          <td style="text-align:center">
+            <div style="display:flex;gap:6px;justify-content:center;">
+              <button class="btn btn-sm" style="background:var(--green-old);color:var(--paper)" onclick="openAjoutModal(${i})"><i class="ti ti-plus"></i> Ajouter</button>
+              <button class="btn btn-sm" onclick="openRetraitModal(${i})" ${s.qte===0?'disabled style="opacity:0.4;cursor:not-allowed"':''}><i class="ti ti-minus"></i> Retirer</button>
+              <button class="btn btn-sm" style="background:#5a3a10;color:var(--paper)" onclick="openSupStock(${i})"><i class="ti ti-trash"></i></button>
+            </div>
+          </td></tr>`;
+      }).join('')
+    : '<tr><td colspan="6" class="empty-state">Aucun article en inventaire</td></tr>';
+}
+
+function renderCompta() {
+  const tot = computeTotals();
+  const soins = state.transactions.filter(t => t.desc && t.desc.startsWith('Soin'));
+  const totalSoins = soins.reduce((acc, t) => acc + t.montant, 0);
+  document.getElementById('compta-metrics').innerHTML = `
+    <div class="metric-card"><div class="label">Solde</div><div class="value" style="color:${tot.balance>=0?'var(--green-old)':'var(--accent)'}">$${tot.balance.toFixed(2)}</div></div>
+    <div class="metric-card"><div class="label">Revenus totaux</div><div class="value" style="color:var(--green-old)">$${tot.income.toFixed(2)}</div></div>
+    <div class="metric-card"><div class="label">Dépenses totales</div><div class="value">$${tot.expense.toFixed(2)}</div></div>
+    <div class="metric-card"><div class="label">Revenus des soins</div><div class="value" style="color:var(--green-old)">$${totalSoins.toFixed(2)}</div><div class="sub">${soins.length} soin${soins.length!==1?'s':''}</div></div>`;
+  if (!state.transactions.length) {
+    document.getElementById('compta-table').innerHTML = '<tr><td colspan="5" class="empty-state">Aucune transaction enregistrée</td></tr>';
+    return;
+  }
+  let running = 0;
+  const rows = [...state.transactions].map(t=>{ running += t.type==='income'?t.montant:-t.montant; return {...t,running}; });
+  const rowsDesc = [...rows].reverse();
+  document.getElementById('compta-table').innerHTML = rowsDesc.map((t,i)=>`
+    <tr>
+      <td style="color:var(--ink-faint);font-style:italic">${t.date}</td>
+      <td>${t.desc}</td>
+      <td>${t.type==='income'?'<span class="badge badge-green">Revenu</span>':'<span class="badge badge-red">Dépense</span>'}</td>
+      <td style="font-weight:600;color:${t.type==='income'?'var(--green-old)':'var(--accent)'}">${t.type==='income'?'+':'-'}$${t.montant.toFixed(2)}</td>
+      <td style="font-weight:600">$${t.running.toFixed(2)}</td>
+      <td style="text-align:center"><button class="btn btn-sm" style="background:#5a3a10;color:var(--paper)" onclick="annulerTransaction(${rows.length - 1 - i})"><i class="ti ti-x"></i> Annuler</button></td>
+    </tr>`).join('');
+}
+
+function formatMinutes(mins) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return h + 'h ' + String(m).padStart(2,'0') + 'min';
+}
+
+function parisTime(ts) {
+  const ms = (ts && typeof ts === 'object' && ts.toMillis) ? ts.toMillis() : Number(ts);
+  return new Date(ms).toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function formatSeconds(secs) {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  return h + 'h ' + String(m).padStart(2,'0') + 'min ' + String(s).padStart(2,'0') + 's';
+}
+
+function renderEmployes() {
+  const totalMins = state.employes.reduce((acc, e) => {
+    let mins = e.totalMinutes || 0;
+    if (e.enService && e.debutService) {
+      mins += Math.floor((Date.now() - e.debutService) / 60000);
+    }
+    return acc + mins;
+  }, 0);
+  document.getElementById('total-heures').textContent = formatMinutes(totalMins);
+
+  document.getElementById('employes-list').innerHTML = state.employes.length
+    ? state.employes.map((e,i)=>{
+        const enService = e.enService || false;
+        let sessionMins = (e.totalMinutes > 0) ? e.totalMinutes : 0;
+        let debutInfo = '';
+        let elapsedId = 'elapsed-' + i;
+        if (enService && e.debutService) {
+          debutInfo = ' · Début : ' + parisTime(e.debutService);
+        }
+        return `
+      <div class="employee-card" style="flex-direction:column;align-items:stretch;">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="emp-avatar">${e.prenom[0]}${e.nom[0]}</div>
+          <div class="emp-info"><div class="emp-name">${e.prenom} ${e.nom}</div><div class="emp-role">${e.poste}</div></div>
+          <button class="btn btn-sm" style="background:#5a3a10;color:var(--paper);margin-left:auto" onclick="openSupEmp(${i})"><i class="ti ti-user-minus"></i> Renvoyer</button>
+        </div>
+        <div class="emp-shift">
+          <div class="emp-shift-status ${enService?'en-service':''}">
+            ${enService ? '● En service' + debutInfo : '○ Hors service'}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
+            <span class="emp-hours" style="color:var(--ink-faint)">Total : <strong id="total-emp-${i}">${formatMinutes(sessionMins)}</strong></span>
+          </div>
+          ${enService
+            ? `<button class="btn btn-sm" style="background:var(--accent)" onclick="finirService(${i})"><i class="ti ti-player-stop"></i> Finir service</button>`
+            : `<button class="btn btn-sm" style="background:var(--green-old);color:var(--paper)" onclick="prendreService(${i})"><i class="ti ti-player-play"></i> Prendre service</button>`
+          }
+        </div>
+      </div>`;
+      }).join('')
+    : '<p class="empty-state">Aucun employé enregistré.</p>';
+
+  // Start live second counters for employees in service
+  state.employes.forEach((e, i) => {
+    if (e.enService && e.debutService) {
+      const el = document.getElementById('total-emp-' + i);
+      if (el) {
+        const tick = () => {
+          const debutMs = (typeof e.debutService === 'object' && e.debutService.toMillis)
+            ? e.debutService.toMillis() : Number(e.debutService);
+          const rawSecs = Math.floor((Date.now() - debutMs) / 1000);
+          const secs = (rawSecs < 0) ? 0 : rawSecs;
+          const totalEl = document.getElementById('total-emp-' + i);
+          if (totalEl) {
+            const totalSecs = (e.totalMinutes || 0) * 60 + secs;
+            totalEl.textContent = formatSeconds(totalSecs);
+          }
+        };
+        tick();
+        // Store interval id on element to avoid duplicates
+        if (el._interval) clearInterval(el._interval);
+        el._interval = setInterval(tick, 1000);
+      }
+    }
+  });
+}
+
+function renderJournal() {
+  document.getElementById('journal-list').innerHTML = state.journal.length
+    ? state.journal.map(e=>{
+        let iconClass, iconName;
+        if (e.type==='income'||e.type==='soin') { iconClass='income'; iconName='ti-coin'; }
+        else if (e.type==='expense') { iconClass='expense'; iconName='ti-shopping-cart'; }
+        else if (e.type==='stock-add') { iconClass='stock-add'; iconName='ti-plus'; }
+        else { iconClass='stock-remove'; iconName='ti-minus'; }
+        const amtClass = (e.type==='income'||e.type==='soin')?'plus':e.type==='expense'?'minus':'neutral';
+        return `<div class="journal-entry">
+          <div class="journal-icon ${iconClass}"><i class="ti ${iconName}"></i></div>
+          <div class="journal-info"><div class="jdesc">${e.desc}</div><div class="jdate">${e.date}</div></div>
+          <div class="journal-amount ${amtClass}">${e.detail}</div>
+        </div>`;
+      }).join('')
+    : '<p class="empty-state">Le journal est vide.</p>';
+}
+
+function renderContacts() {
+  const list = document.getElementById('contacts-list');
+  if (!list) return;
+
+  const rawQuery = document.getElementById('annuaire-search')?.value || '';
+  const query = rawQuery.toLowerCase().trim();
+  const allContacts = state.contacts || [];
+
+  if (!allContacts.length) {
+    list.innerHTML = '<p class="empty-state">Aucun contact enregistré.</p>';
+    return;
+  }
+
+  function score(c) {
+    if (!query) return 0;
+    const nom      = (c.nom      || '').toLowerCase();
+    const telegram = (c.telegram || '').toLowerCase();
+    const emploi   = (c.emploi   || '').toLowerCase();
+    if (nom === query)               return 5;
+    if (nom.startsWith(query))       return 4;
+    if (nom.includes(query))         return 3;
+    if (telegram.includes(query))    return 2;
+    if (emploi.includes(query))      return 1;
+    return -1;
+  }
+
+  let scored = allContacts.map((c, realIdx) => ({ c, realIdx, s: score(c) }));
+  if (query) {
+    scored = scored.filter(x => x.s >= 0);
+    scored.sort((a, b) => b.s - a.s);
+  }
+
+  if (!scored.length) {
+    list.innerHTML = `<p class="empty-state">Aucun résultat pour « ${rawQuery} ».</p>`;
+    return;
+  }
+
+  function hl(text, q) {
+    if (!q || !text) return text || '';
+    const idx = text.toLowerCase().indexOf(q);
+    if (idx === -1) return text;
+    return text.slice(0, idx)
+      + '<mark style="background:#f5e6a3;color:var(--ink);border-radius:2px;padding:0 1px;">'
+      + text.slice(idx, idx + q.length)
+      + '</mark>'
+      + text.slice(idx + q.length);
+  }
+
+  list.innerHTML = scored.map(({ c, realIdx }) => `
+    <div class="employee-card" style="align-items:center;gap:16px;">
+      <div class="emp-avatar" style="background:var(--accent)">${(c.nom || '?')[0].toUpperCase()}</div>
+      <div class="emp-info" style="flex:1;">
+        <div class="emp-name">${hl(c.nom, query)}</div>
+        <div class="emp-role" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:2px;">
+          <span><i class="ti ti-brand-telegram" style="font-size:13px;margin-right:3px;"></i>${hl(c.telegram || '—', query)}</span>
+          ${c.emploi ? `<span style="color:var(--ink-faint);font-style:italic">${hl(c.emploi, query)}</span>` : ''}
+        </div>
+      </div>
+      <button class="btn btn-sm" style="background:#5a3a10;color:var(--paper)" onclick="openSupContact(${realIdx})"><i class="ti ti-trash"></i></button>
+    </div>`).join('');
+}
+
+// Wire search input after DOM ready — use keyup for instant response
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('annuaire-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', renderContacts);
+    searchInput.addEventListener('keyup', renderContacts);
+  }
+});
+
+let supContactIndex = -1;
+window.addContact = async function() {
+  const nom = document.getElementById('c-nom').value.trim();
+  const telegram = document.getElementById('c-telegram').value.trim();
+  if (!nom || !telegram) { showToast('Nom et Telegram requis.'); return; }
+  const emploi = document.getElementById('c-emploi').value.trim();
+  if (!state.contacts) state.contacts = [];
+  state.contacts.push({ nom, telegram, emploi });
+  closeModal('modal-contact');
+  ['c-nom','c-telegram','c-emploi'].forEach(id => document.getElementById(id).value = '');
+  showToast(nom + " ajouté à l'annuaire.", 'success'); renderAll(); await saveState();
+};
+
+window.openSupContact = function(i) {
+  supContactIndex = i;
+  document.getElementById('sup-contact-nom').textContent = state.contacts[i].nom;
+  openModal('modal-sup-contact');
+};
+window.confirmerSupContact = async function() {
+  const nom = state.contacts[supContactIndex].nom;
+  state.contacts.splice(supContactIndex, 1);
+  closeModal('modal-sup-contact');
+  showToast(nom + ' supprimé.', 'success'); renderAll(); await saveState();
+};
+
+// ── BLOC-NOTES ────────────────────────────────────────────────────────────────
+window.openModalNote = function() {
+  const sel = document.getElementById('n-auteur');
+  sel.innerHTML = (state.employes && state.employes.length)
+    ? state.employes.map(e => `<option>${e.prenom} ${e.nom}</option>`).join('')
+    : '<option>Anonyme</option>';
+  openModal('modal-note');
+};
+
+// Override the button to populate the select first
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.querySelector('[onclick="openModal(\'modal-note\')"]');
+  if (btn) btn.setAttribute('onclick', 'openModalNote()');
+});
+
+window.addNote = async function() {
+  const titre = document.getElementById('n-titre').value.trim();
+  const texte = document.getElementById('n-texte').value.trim();
+  if (!texte) { showToast('Le message ne peut pas être vide.'); return; }
+  if (!state.notes) state.notes = [];
+  const tagsRaw = document.getElementById('n-tags').value.trim();
+  const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+  state.notes.unshift({
+    auteur: document.getElementById('n-auteur').value,
+    priority: document.getElementById('n-priority').value,
+    titre: titre || 'Note',
+    texte,
+    tags,
+    date: new Date().toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })
+  });
+  closeModal('modal-note');
+  ['n-titre','n-texte','n-tags'].forEach(id => document.getElementById(id).value = '');
+  showToast('Note publiée.', 'success'); renderAll(); await saveState();
+};
+
+window.supprimerNote = async function(i) {
+  state.notes.splice(i, 1);
+  showToast('Note supprimée.', 'success'); renderAll(); await saveState();
+};
+
+function renderBlocnotes() {
+  const list = document.getElementById('blocnotes-list');
+  if (!list) return;
+  if (!state.notes) state.notes = [];
+  if (!state.notes.length) {
+    list.innerHTML = '<p class="empty-state">Le bloc-notes est vide. Publiez la première note !</p>';
+    return;
+  }
+  const priorityLabel = { haute: '⚠ Urgente', normale: '📌 Normale', info: 'ℹ Info' };
+  const priorityBadge = { haute: 'badge-red', normale: 'badge-amber', info: 'badge-green' };
+  list.innerHTML = state.notes.map((n, i) => {
+    const initiales = n.auteur ? n.auteur.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : '?';
+    return `
+    <div class="note-card priority-${n.priority || 'normale'}">
+      <div class="note-top">
+        <div class="note-auteur-avatar">${initiales}</div>
+        <div class="note-auteur-info">
+          <div class="note-auteur-name">${n.auteur || 'Anonyme'}</div>
+          <div class="note-meta">${n.date || ''}</div>
+        </div>
+        <span class="badge ${priorityBadge[n.priority||'normale']}" style="margin-left:auto;align-self:flex-start;">${priorityLabel[n.priority||'normale']}</span>
+      </div>
+      ${n.titre ? `<div class="note-titre">${n.titre}</div>` : ''}
+      <div class="note-texte">${n.texte}</div>
+      <div class="note-footer">
+        <div class="note-tags">
+          ${(n.tags||[]).map(t=>`<span class="note-tag">${t}</span>`).join('')}
+        </div>
+        <button class="btn-outline btn-sm" style="color:var(--accent);border-color:var(--accent)" onclick="supprimerNote(${i})"><i class="ti ti-trash"></i> Supprimer</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+
+let filtreCourant = 'tous';
+let editContratIndex = -1;
+let supContratIndex = -1;
+
+window.filtrerContrats = function(filtre, el) {
+  filtreCourant = filtre;
+  document.querySelectorAll('.filtre-contrat').forEach(b => b.classList.remove('active-filtre'));
+  if (el) el.classList.add('active-filtre');
+  renderContrats();
+};
+
+window.addContrat = async function() {
+  const titre = document.getElementById('ct-titre').value.trim();
+  const partie = document.getElementById('ct-partie').value.trim();
+  if (!titre || !partie) { showToast('Intitulé et partie contractante requis.'); return; }
+  if (!state.contrats) state.contrats = [];
+  state.contrats.unshift({
+    titre,
+    partie,
+    type: document.getElementById('ct-type').value,
+    statut: document.getElementById('ct-statut').value,
+    debut: document.getElementById('ct-debut').value,
+    echeance: document.getElementById('ct-echeance').value,
+    montant: parseFloat(document.getElementById('ct-montant').value) || 0,
+    frequence: document.getElementById('ct-frequence').value,
+    clauses: document.getElementById('ct-clauses').value.trim(),
+    dateCreation: today()
+  });
+  closeModal('modal-contrat');
+  ['ct-titre','ct-partie','ct-montant','ct-clauses','ct-debut','ct-echeance'].forEach(id => document.getElementById(id).value = '');
+  state.journal.unshift({ type: 'income', desc: 'Contrat enregistré : ' + titre + ' — ' + partie, date: today(), detail: 'contrat' });
+  showToast('Contrat enregistré.', 'success'); renderAll(); await saveState();
+};
+
+window.openEditContrat = function(i) {
+  editContratIndex = i;
+  const c = state.contrats[i];
+  document.getElementById('ect-titre').value = c.titre || '';
+  document.getElementById('ect-partie').value = c.partie || '';
+  document.getElementById('ect-montant').value = c.montant || '';
+  document.getElementById('ect-clauses').value = c.clauses || '';
+  document.getElementById('ect-debut').value = c.debut || '';
+  document.getElementById('ect-echeance').value = c.echeance || '';
+  // Set selects
+  ['ect-type','ect-statut','ect-frequence'].forEach(id => {
+    const key = id.replace('ect-','');
+    const sel = document.getElementById(id);
+    for (let opt of sel.options) { if (opt.value === c[key] || opt.text === c[key]) { sel.value = opt.value; break; } }
+  });
+  openModal('modal-edit-contrat');
+};
+
+window.saveEditContrat = async function() {
+  const c = state.contrats[editContratIndex];
+  c.titre = document.getElementById('ect-titre').value.trim();
+  c.partie = document.getElementById('ect-partie').value.trim();
+  c.type = document.getElementById('ect-type').value;
+  c.statut = document.getElementById('ect-statut').value;
+  c.debut = document.getElementById('ect-debut').value;
+  c.echeance = document.getElementById('ect-echeance').value;
+  c.montant = parseFloat(document.getElementById('ect-montant').value) || 0;
+  c.frequence = document.getElementById('ect-frequence').value;
+  c.clauses = document.getElementById('ect-clauses').value.trim();
+  closeModal('modal-edit-contrat');
+  showToast('Contrat mis à jour.', 'success'); renderAll(); await saveState();
+};
+
+window.openSupContrat = function(i) {
+  supContratIndex = i;
+  document.getElementById('sup-contrat-nom').textContent = state.contrats[i].titre;
+  openModal('modal-sup-contrat');
+};
+
+window.confirmerSupContrat = async function() {
+  const nom = state.contrats[supContratIndex].titre;
+  state.contrats.splice(supContratIndex, 1);
+  closeModal('modal-sup-contrat');
+  showToast(nom + ' supprimé.', 'success'); renderAll(); await saveState();
+};
+
+window.toggleContratBody = function(i) {
+  const body = document.getElementById('contrat-body-' + i);
+  body.classList.toggle('open');
+};
+
+function renderContrats() {
+  if (!state.contrats) state.contrats = [];
+  const contrats = filtreCourant === 'tous' ? state.contrats : state.contrats.filter(c => c.statut === filtreCourant);
+  const actifs = state.contrats.filter(c => c.statut === 'actif');
+  const valeurTotale = actifs.reduce((s, c) => s + (c.montant || 0), 0);
+  document.getElementById('stat-contrats-actifs').textContent = actifs.length;
+  document.getElementById('stat-contrats-valeur').textContent = '$' + valeurTotale.toFixed(2);
+  document.getElementById('stat-contrats-total').textContent = state.contrats.length;
+
+  const iconMap = { actif: 'ti-file-check', suspendu: 'ti-file-off', termine: 'ti-file-x' };
+  const labelMap = { actif: 'Actif', suspendu: 'Suspendu', termine: 'Terminé' };
+  const badgeMap = { actif: 'badge-green', suspendu: 'badge-amber', termine: 'badge-red' };
+
+  const list = document.getElementById('contrats-list');
+  if (!contrats.length) {
+    list.innerHTML = '<p class="empty-state">' + (filtreCourant === 'tous' ? 'Aucun contrat enregistré.' : 'Aucun contrat ' + filtreCourant + '.') + '</p>';
+    return;
+  }
+  list.innerHTML = contrats.map((c, idx) => {
+    const realIdx = state.contrats.indexOf(c);
+    const statut = c.statut || 'actif';
+    const montantFmt = c.montant ? '$' + parseFloat(c.montant).toFixed(2) + (c.frequence && c.frequence !== 'Unique' ? ' / ' + c.frequence.toLowerCase() : '') : '—';
+    const debutFmt = c.debut ? new Date(c.debut + 'T00:00:00').toLocaleDateString('fr-FR') : '—';
+    const echFmt = c.echeance ? new Date(c.echeance + 'T00:00:00').toLocaleDateString('fr-FR') : '—';
+    return `
+    <div class="contrat-card">
+      <div class="contrat-header" onclick="toggleContratBody(${realIdx})">
+        <div class="contrat-icon ${statut}"><i class="ti ${iconMap[statut] || 'ti-file'}"></i></div>
+        <div class="contrat-meta">
+          <div class="contrat-nom">${c.titre}</div>
+          <div class="contrat-sous"><i class="ti ti-user" style="font-size:11px;margin-right:3px;"></i>${c.partie} · <span style="font-style:normal;color:var(--sepia)">${c.type || ''}</span></div>
+        </div>
+        <div class="contrat-badge-wrap">
+          <span class="badge ${badgeMap[statut]}">${labelMap[statut]}</span>
+          ${c.montant ? `<span style="font-family:'Playfair Display',serif;font-size:14px;color:var(--green-old);font-weight:700;">${montantFmt}</span>` : ''}
+          <i class="ti ti-chevron-down" style="color:var(--ink-faint);font-size:14px;transition:transform 0.2s;"></i>
+        </div>
+      </div>
+      <div class="contrat-body" id="contrat-body-${realIdx}">
+        <div class="contrat-detail-grid">
+          <div class="contrat-detail"><div class="cd-label">Type</div><div class="cd-val">${c.type || '—'}</div></div>
+          <div class="contrat-detail"><div class="cd-label">Montant</div><div class="cd-val">${montantFmt}</div></div>
+          <div class="contrat-detail"><div class="cd-label">Début</div><div class="cd-val">${debutFmt}</div></div>
+          <div class="contrat-detail"><div class="cd-label">Échéance</div><div class="cd-val">${echFmt}</div></div>
+        </div>
+        ${c.clauses ? `<div class="contrat-clauses">${c.clauses}</div>` : ''}
+        <div class="contrat-actions-bar">
+          <button class="btn btn-sm" onclick="openEditContrat(${realIdx})"><i class="ti ti-edit"></i> Modifier</button>
+          <button class="btn btn-sm" style="background:#5a3a10;color:var(--paper)" onclick="openSupContrat(${realIdx})"><i class="ti ti-trash"></i> Supprimer</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAll() { renderDashboard(); renderStocks(); renderCompta(); renderEmployes(); renderJournal(); renderContacts(); renderContrats(); renderBlocnotes(); }
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────────
+const pageTitles = {
+  guide:        ['ti-book-2','Guide médical'],
+  dashboard:    ['ti-layout-dashboard','Tableau de bord'],
+  stocks:       ['ti-flask','Inventaire médical'],
+  comptabilite: ['ti-report-money','Comptabilité'],
+  employes:     ['ti-users','Registre des employés'],
+  contrats:     ['ti-file-certificate','Registre des contrats'],
+  blocnotes:    ['ti-pencil','Bloc-notes du Cabinet de Rhodes'],
+  journal:      ['ti-notebook','Journal des opérations'],
+  annuaire:     ['ti-address-book','Annuaire des contacts'],
+};
+window.showPage = function(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+  const t = pageTitles[id];
+  document.getElementById('page-title').innerHTML = `<i class="ti ${t[0]}"></i><span>${t[1]}</span>`;
+};
+window.openModal  = id => document.getElementById(id).classList.add('open');
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+
+// ── LOCK SCREEN ──────────────────────────────────────────────────────────────
+(function() {
+  const lockEl = document.getElementById('lock-screen');
+  const inputEl = document.getElementById('lock-input');
+
+  // If already unlocked this session, hide immediately
+  if (sessionStorage.getItem('cabinet_unlocked') === '1') {
+    lockEl.style.display = 'none';
+    return;
+  }
+
+  // Focus the input
+  setTimeout(() => inputEl && inputEl.focus(), 100);
+
+  window.verifierLock = function() {
+    const val = inputEl.value;
+    if (val === CODE_LOCK) {
+      lockEl.classList.add('hidden');
+      setTimeout(() => lockEl.style.display = 'none', 650);
+      document.getElementById('lock-error').textContent = '';
+    } else {
+      inputEl.classList.add('shake');
+      document.getElementById('lock-error').textContent = 'Code incorrect — réessayez.';
+      inputEl.value = '';
+      setTimeout(() => { inputEl.classList.remove('shake'); inputEl.focus(); }, 450);
+    }
+  };
+})();
+
+// ── GUIDE MÉDICAL ─────────────────────────────────────────────────────────────
+
+window.toggleGuideSection = function(id) {
+  const body = document.getElementById('gbody-' + id);
+  const arrow = document.getElementById('garrow-' + id);
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (isOpen) { arrow.classList.remove('open'); } else { arrow.classList.add('open'); }
+};
+
+const guidesData = {
+  // ── BOBOLOGIE & BRÛLURES ──────────────────────────────────────
+  choc: {
+    icon: '💥',
+    titre: 'Choc',
+    sections: [
+      { head: '🌿 Traitement immédiat', steps: ['Appliquer de l\'arnica sur la zone choquée 🌿', 'Surveiller attentivement le patient'] },
+      { head: '🧠 Surveillance neurologique', steps: ['Observer si le patient dit ou fait des choses insensées 🤔', 'Vérifier la motricité (mouvements cohérents) 🖐️', 'S\'assurer qu\'il arrive à s\'exprimer correctement 🗣️'], warn: '⚠️ Si le choc est à la tête : surveillance renforcée obligatoire. Tout symptôme inhabituel doit alerter immédiatement.' },
+    ]
+  },
+  egratignure: {
+    icon: '🩸',
+    titre: 'Égratignures',
+    sections: [
+      { head: '💧 1. Rinçage', steps: ['Rincer abondamment à l\'eau claire 💧'] },
+      { head: '🧴 2. Désinfection', steps: ['Désinfecter à l\'alcool à 70° 🧴'] },
+      { head: '🌿 3. Cataplasme', steps: ['Appliquer un cataplasme à la sauge du désert 🌿', 'Si sur le visage : cataplasme au miel à la place 🍯'] },
+      { head: '🩹 4. Bandage', steps: ['Poser un bandage propre et sec 🩹'] },
+    ]
+  },
+  brulure: {
+    icon: '🔥',
+    titre: 'Brûlure',
+    sections: [
+      { head: '💧 1. Rinçage', steps: ['Rincer abondamment à l\'eau claire 💦', 'Ne surtout PAS désinfecter à l\'alcool, même si une cautérisation a eu lieu ⚠️'] },
+      { head: '🌿 2. Application d\'aloé vera', steps: ['Appliquer de l\'aloé vera en couche suffisante sur toute la zone brûlée 🌿'] },
+      { head: '🚫 3. Recouvrement', steps: ['Éviter au maximum d\'appliquer un bandage ou de recouvrir la zone brûlée 🚫🩹'], warn: '⚠️ Ne jamais désinfecter à l\'alcool une brûlure — même après cautérisation. L\'aloé vera est le traitement de référence.' },
+    ]
+  },
+  morsure_venimeuse: {
+    icon: '🐍',
+    titre: 'Morsure venimeuse (serpents)',
+    sections: [
+      { head: '🩹 1. Traitement de la plaie', steps: ['Traiter la plaie normalement 🩹', 'Rinçage à l\'eau claire, désinfection à l\'alcool à 70°'] },
+      { head: '⚫ 2. Cataplasme au charbon', steps: ['Appliquer un cataplasme au charbon actif sur la plaie ⚫', 'Le charbon absorbe le venin présent dans les tissus'] },
+    ]
+  },
+
+  // ── CHIRURGIE LÉGÈRE ──────────────────────────────────────────
+  chir_legere_bases: {
+    icon: '📋',
+    titre: 'Chirurgie légère — Les bases',
+    sections: [
+      { head: '📖 Définition', steps: ['Atteintes non-invasives du corps (chirurgie non invasive) 🩺', 'Le pronostic vital du patient n\'est pas engagé ✅', 'Peut survenir suite à morsures animales, blessures par balles ou objets contondants 🔫'] },
+      { head: '✅ Avant toute intervention', steps: ['Installation du patient dans un lieu adapté (propre, sans intrusion) 🏠', 'Déshabillage du patient 👕', 'Inspecter la zone nécessitant des soins 🔍', 'Se laver les mains et porter un masque 🧼 (des gants peuvent être portés)', 'Prise des constantes : pouls, souffle, douleur, état général 📊', 'Rincer la plaie à l\'eau pure et désinfecter à l\'alcool à 70° 🧴'] },
+      { head: '✅ Après toute intervention', steps: ['Application du cataplasme correspondant sur la plaie suturée + bandage 🌿🩹', 'Reprise des constantes (pouls, douleur, état général) 📊', 'Traitement antiseptique et/ou antipyrétique 💊', 'Conseils de convalescence et suite des soins 🛌', 'Remplir le dossier de soin du patient 📝'] },
+    ]
+  },
+  retrait_balle_legere: {
+    icon: '🔫',
+    titre: 'Retrait de balle (chirurgie légère)',
+    sections: [
+      { head: '🛠️ Matériel requis', steps: ['Scalpel 🔪', 'Écarteur', 'Pince courbée', 'Eau pure 💧', 'Aiguille + fils de soie 🪡', 'Cataplasme 🌿'] },
+      { head: '⚙️ Étapes', steps: ['Rinçage à l\'eau claire et désinfection à l\'alcool à 70° 🧴', 'Ouverture de la plaie au scalpel (plan par plan) 🔪', 'Pose d\'un écarteur', 'Extraction de la balle avec la pince 🔧', 'Rinçage de la plaie à l\'eau pure (vérification d\'éclats) 💧', 'Ligature des veines/artères au catgut si hémorragie 🩸', 'Rinçage (autant que nécessaire durant l\'opération)', 'Suture du muscle au catgut 🪡', 'Suture du plan cutané au fil de soie', 'Désinfection de la cicatrice 🧴', 'Application d\'un cataplasme à la sauge du désert 🌿 — Bandage 🩹'] },
+    ]
+  },
+
+  // ── CHIRURGIE LOURDE ──────────────────────────────────────────
+  chir_lourde_bases: {
+    icon: '📋',
+    titre: 'Chirurgie lourde — Les bases',
+    sections: [
+      { head: '📖 Définition', steps: ['Atteintes invasives du corps : au-delà de la barrière cutanée 🩺', 'Dès qu\'un muscle, un os ou un organe est atteint → chirurgie lourde 💀', 'Le pronostic vital du patient est engagé ⚠️'] },
+      { head: '✅ Avant toute intervention', steps: ['Installation dans une salle adaptée (propre, sans intrusions) 🏠', 'Déshabillage du patient 👕', 'Lavage de mains et port de masque de protection 🧼', 'Anesthésie du patient (sauf ponction pleurale) 💉'] },
+      { head: '😴 Anesthésie — Pour endormir', steps: ['🌫️ Chloroforme', '💧 Gouttes d\'Éther', '💉 Morphine'] },
+      { head: '⬆️ Anesthésie — Pour réveiller', steps: ['🧪 Sels d\'ammoniaque (odeur semblable à celle d\'un cadavre)'], warn: '⚠️ Les sels d\'ammoniaque ont une odeur très forte — prévenir les personnes présentes.' },
+      { head: '✅ Après toute intervention', steps: ['Application de cataplasme à la sauge du désert sur plaie suturée 🌿', 'Vérification de la température, pouls, état général, douleur 📊', 'Traitement antiseptique systématique : tisane ail de vignes, origan, poule des bois 🌿', 'Antipyrétique uniquement si fièvre : millefeuille 🌸', 'Conseils de convalescence et suite des soins 🛌', 'Remplir le dossier de soins 📝'] },
+    ]
+  },
+  balle_profonde: {
+    icon: '🔫',
+    titre: 'Retrait de balles profondes',
+    sections: [
+      { head: '📖 Contexte', steps: ['Zones concernées : gras, muscle, péritoine (poche contenant les organes principaux dont l\'utérus) 🫀'] },
+      { head: '🛠️ Matériel requis', steps: ['Scalpel 🔪', 'Écarteur', 'Pince', 'Matériel de suture 🪡', 'Cataplasme 🌿'] },
+      { head: '⚙️ Étapes', steps: ['Ouverture de la plaie au scalpel (plan par plan) 🔪', 'Pose d\'un écarteur', 'Extraction de la balle 🔧', 'Rinçage de la plaie à l\'eau pure (vérification) 💧', 'Si hémorragie : ligaturer artères et veines 🩸', 'Suture des différents plans jusqu\'au plan cutané 🪡', 'Application d\'un cataplasme à la sauge du désert 🌿'] },
+      { head: '⚠️ Cas particuliers', steps: ['Atteinte intestinale : sortir les intestins de la cavité abdominale, vérifier les lésions en rinçant en continu, remettre les intestins en accordéon 🫀', 'Atteinte d\'un organe : suturer la lésion, ou retirer l\'organe s\'il est trop abîmé (cf retrait d\'organe) ⚠️'], warn: '⚠️ Ne jamais refermer sans avoir inspecté l\'ensemble des plans traversés.' },
+    ]
+  },
+  ponction_pleurale: {
+    icon: '🫁',
+    titre: 'Ponction pleurale',
+    sections: [
+      { head: '📖 Indication', steps: ['Au stéthoscope : absence de souffle au niveau d\'un poumon → liquide dans la cavité pleurale 🔊', 'Survient généralement lorsqu\'une balle / objet contondant touche des côtes ou traverse le péritoine'] },
+      { head: '🛠️ Matériel requis', steps: ['Aiguille', 'Tuyau', 'Flacon de drainage (posé au sol) 🧴', 'Matériel de suture 🪡', 'Stéthoscope 🔊'] },
+      { head: '⚙️ Étapes', steps: ['Montage du système aiguille — tuyau — flacon (flacon au sol)', 'Repérage au stéthoscope de la zone à ponctionner 🔊', 'Pose d\'un fil de suture sans nœud à la base de l\'aiguille 🪡', 'Insertion de l\'aiguille entre 2 côtes jusqu\'au retour d\'air (bulles dans le flacon) ou de liquide (visible dans le tuyau) — si par le dos : côtes flottantes', 'Si le patient tousse → le poumon a été touché : légèrement retirer l\'aiguille ⬆️', 'Attendre que le flacon ne bulle plus ou que le liquide ne s\'écoule plus (environ 5 min) ⏱️', 'Vérifier le positionnement du poumon au stéthoscope 🔊', 'Retrait rapide de l\'aiguille + fermeture de l\'orifice grâce au fil de suture 🪡', 'Expiration continue du patient → le poumon reprend place correctement (bruit de claquement) 👂'] },
+    ]
+  },
+  fractures: {
+    icon: '🦴',
+    titre: 'Fractures',
+    sections: [
+      { head: '📖 Objectif', steps: ['Stabiliser l\'os et prévenir des complications graves 🦴'] },
+      { head: '🛠️ Matériel requis', steps: ['Morphine 💉', 'Corps gras', 'Eau pure 💧', 'Bandes de tissu', 'Plâtre'] },
+      { head: '🩸 Fracture ouverte', steps: ['Injection légère de morphine sur la zone 💉', 'Traiter la plaie 🩹', 'Ligature des veines et artères 🩸', 'Remise en place de l\'os (possibilité de limage pour rentrer dans l\'axe et éviter les déchirures) 🦴', 'Ligature du muscle et suture du plan cutané 🪡', 'Pose d\'un cataplasme à la sauge du désert + bandage + attelle 🌿🩹'] },
+      { head: '🩹 Fracture simple', steps: ['Nettoyer la zone à l\'eau claire 💧', 'Injection légère de morphine sur la zone 💉', 'Application d\'un corps gras sur la zone', 'Immobiliser avec des bandes de tissu la zone fracturée 🩹', 'Exercer une pression latérale (ramener le fragment d\'os cassé)', 'Faire des mouvements de rotation et vérifier l\'alignement 🔄', 'Immobiliser le membre avec un plâtre 🦴'] },
+    ]
+  },
+  enucleation: {
+    icon: '👁️',
+    titre: 'Énucléation (retrait complet de l\'œil)',
+    sections: [
+      { head: '📖 Indication', steps: ['Traumatisme sévère de l\'œil 👁️', 'Cancer oculaire'] },
+      { head: '🔍 Avant la procédure', steps: ['Palper l\'œil et vérifier son état 🖐️', 'Rincer à l\'eau pure 💧', 'Retirer les impuretés visibles'] },
+      { head: '🛠️ Matériel requis', steps: ['Scalpel 🔪', 'Eau oxygénée', 'Seringues de Pravaz 💉', 'Écarteur oculaire', 'Ciseaux ✂️', 'Pince fine', 'Compresses', 'Matériel de suture 🪡'] },
+      { head: '⚙️ Étapes', steps: ['Pose d\'un écarteur oculaire', 'Nettoyage à l\'eau pure 💧', 'Incision au scalpel autour de la cornée et des muscles 🔪', 'Détacher l\'œil à l\'aide de la pince', 'Clamper et ligaturer le nerf optique', 'Sectionner au bistouri le nerf optique 🔪', 'Extraction de l\'œil 👁️', 'Rinçage à l\'eau pure 💧', 'Suturer la conjonctive 🪡', 'Couvrir l\'orbite avec une compresse imbibée de camomille + bandage autour de l\'œil 🌼🩹', 'Surveiller la cicatrisation 👀'], warn: '⚠️ Si le nerf optique est arraché plutôt que sectionné correctement, la pose d\'un œil de verre sera impossible.' },
+    ]
+  },
+  trepanation: {
+    icon: '🧠',
+    titre: 'Trépanation',
+    sections: [
+      { head: '📖 Indications', steps: ['Traumatisme crânien (balle dans le crâne) 🔫', 'Hémorragie / œdème cérébrale 🧠', 'Fracture ou abcès cérébral', 'Prévention de lésions dues à une compression', 'Symptômes : migraines sévères, convulsions, perte de connaissance, confusion, malaises à répétition ⚠️'] },
+      { head: '🛠️ Matériel requis', steps: ['Trépans 🔩', 'Scalpel 🔪', 'Pince', 'Compresses', 'Matériel de suture 🪡', 'Cataplasme 🌿', 'Bandage 🩹'] },
+      { head: '⚙️ Étapes', steps: ['Palper la zone pour localiser (gonflement, fracture, objet à l\'intérieur) 🖐️', 'Rasage de la zone ✂️', 'Traçage au charbon (repérage) ⚫', 'Ouverture de la zone au bistouri 🔪', 'Pose d\'un écarteur', 'Perforation de la zone au trépan (si au-delà de la boîte crânienne ex : œdème cérébrale) 🔩', 'Retirer les fragments d\'os avec la pince 🦴', 'Insérer et soulever l\'élévateur sous les fragments (replacer les os fracturés / coller à la résine)', 'Absorption du sang / liquide avec les compresses 🩸', 'Retirer l\'écarteur', 'Suturer la zone 🪡', 'Surveiller les symptômes et la cicatrisation 👀'], warn: '⚠️ Symptômes et cicatrisation à surveiller de près après l\'intervention.' },
+    ]
+  }
+};
+
+window.ouvrirGuide = function(key) {
+  const g = guidesData[key];
+  if (!g) return;
+  let html = `<div class="guide-proc-title"><span>${g.icon}</span>${g.titre}</div>`;
+  html += `<div class="ornament-sm" style="color:var(--border-dark);letter-spacing:6px;font-size:14px;margin-bottom:16px;">— ✦ —</div>`;
+  g.sections.forEach(s => {
+    html += `<div class="guide-section${s.reco ? ' guide-reco' : ''}">`;
+    html += `<div class="guide-section-head">${s.head}</div>`;
+    if (s.warn) html += `<div class="guide-warn">${s.warn}</div>`;
+    html += `<ul class="guide-steps">`;
+    s.steps.forEach(step => { html += `<li>${step}</li>`; });
+    html += `</ul>`;
+    if (s.warnEnd) html += `<div class="guide-warn-red" style="margin-top:10px;">${s.warnEnd}</div>`;
+    html += `</div>`;
+  });
+  document.getElementById('guide-modal-content').innerHTML = html;
+  openModal('modal-guide');
+};
+
+// ── DÉMARRAGE ────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
